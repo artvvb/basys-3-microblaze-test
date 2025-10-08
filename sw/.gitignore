@@ -1,0 +1,6 @@
+# ignore all
+*
+# except
+!src/*
+!ws/*
+!scripts

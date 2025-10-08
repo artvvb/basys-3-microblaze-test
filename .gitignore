@@ -1,0 +1,8 @@
+# ignore all
+*
+# except
+!README.md
+!.gitignore
+!.gitmodules
+!sw/
+!hw/
