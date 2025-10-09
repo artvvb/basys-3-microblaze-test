@@ -1,0 +1,8 @@
+# ignore all
+*
+# except
+!.gitignore
+!app_component/
+!app_component/**
+!platform/
+!platform/**

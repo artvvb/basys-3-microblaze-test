@@ -1,7 +1,9 @@
 # ignore all
 *
 # except
-!src/*
-!ws/*
+!src
+!src/**
+!ws
+!ws/**
 !scripts
 !.gitignore
