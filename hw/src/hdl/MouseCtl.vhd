@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------
 -- mouse_controller.vhd
 ------------------------------------------------------------------------
--- Author : Ulrich Zoltán
+-- Author : Ulrich Zoltï¿½n
 --          Copyright 2006 Digilent, Inc.
 ------------------------------------------------------------------------
 -- This file contains a controller for a ps/2 compatible mouse device.
@@ -180,27 +180,28 @@ entity MouseCtl is
 generic
 (
    SYSCLK_FREQUENCY_HZ : integer := 100000000;
-   CHECK_PERIOD_MS     : integer := 500; -- Period in miliseconds to check if the mouse is present
+   CHECK_PERIOD_MS     : integer := 100; -- Period in miliseconds to check if the mouse is present
    TIMEOUT_PERIOD_MS   : integer := 100 -- Timeout period in miliseconds when the mouse presence is checked
 );
 port(
-   clk         : in std_logic;
-   rst         : in std_logic;
-   xpos        : out std_logic_vector(11 downto 0);
-   ypos        : out std_logic_vector(11 downto 0);
-   zpos        : out std_logic_vector(3 downto 0);
-   left        : out std_logic;
-   middle      : out std_logic;
-   right       : out std_logic;
-   new_event   : out std_logic;
-   value       : in std_logic_vector(11 downto 0);
-   setx        : in std_logic;
-   sety        : in std_logic;
-   setmax_x    : in std_logic;
-   setmax_y    : in std_logic;
+   clk                   : in std_logic;
+   rst                   : in std_logic;
+   xpos                  : out std_logic_vector(11 downto 0);
+   ypos                  : out std_logic_vector(11 downto 0);
+   zpos                  : out std_logic_vector(3 downto 0);
+   left                  : out std_logic;
+   middle                : out std_logic;
+   right                 : out std_logic;
+   err_mouse_not_present : out std_logic;
+   new_event             : out std_logic;
+   value                 : in std_logic_vector(11 downto 0);
+   setx                  : in std_logic;
+   sety                  : in std_logic;
+   setmax_x              : in std_logic;
+   setmax_y              : in std_logic;
    
-   ps2_clk     : inout std_logic;
-   ps2_data    : inout std_logic
+   ps2_clk               : inout std_logic;
+   ps2_data              : inout std_logic
    
 );
 end MouseCtl;
@@ -212,8 +213,8 @@ architecture Behavioral of MouseCtl is
 ------------------------------------------------------------------------
 COMPONENT Ps2Interface
 PORT(
-   ps2_clk        : inout std_logic;
-   ps2_data       : inout std_logic;
+   ps2_clk_io     : inout std_logic;
+   ps2_data_io    : inout std_logic;
    clk            : in std_logic;
    rst            : in std_logic;
    tx_data        : in std_logic_vector(7 downto 0);
@@ -326,7 +327,7 @@ type fsm_state is
    reset_enable_reporting,reset_enable_reporting_wait_ack,   
    read_byte_1,read_byte_2,read_byte_3,read_byte_4,
    check_read_id,check_read_id_wait_ack,check_read_id_wait_id,
-   mark_new_event
+   mark_new_event, mark_timeout_err
 );
 -- holds current state of the FSM
 signal state: fsm_state := reset;
@@ -370,8 +371,8 @@ begin
    Inst_Ps2Interface: Ps2Interface
    PORT MAP
    (
-      ps2_clk        => ps2_clk,
-      ps2_data       => ps2_data,
+      ps2_clk_io     => ps2_clk,
+      ps2_data_io    => ps2_data,
       clk            => clk,
       rst            => rst,
       tx_data        => tx_data,
@@ -636,6 +637,7 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
             -- "_wait_ack".
             -- Read at Behavioral decription for details.
             when reset =>
+                
                haswheel <= '0';
                x_overflow <= '0';
                y_overflow <= '0';
@@ -653,6 +655,8 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
                reset_periodic_check_cnt <= '1';
                reset_timeout_cnt <= '1';               
                state <= reset_wait_ack;
+               err_mouse_not_present <= '0';
+               new_event <= '0';
 
             -- wait ack for the reset command.
             -- when received transition to reset_wait_bat_completion.
@@ -1123,7 +1127,7 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
                elsif(err = '1') then
                   state <= reset;
                elsif (timeout = '1') then -- Timeout ocurred, so the mouse is not present, go to the reset state
-                  state <= reset;
+                  state <= mark_timeout_err;
                else
                   state <= check_read_id_wait_ack;
                end if;
@@ -1140,16 +1144,22 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
                      reset_timeout_cnt <= '1';
                      state <= read_byte_1;
                   else
-                     state <= reset;
+                     state <= mark_timeout_err;
                   end if;
                elsif(err = '1') then
-                  state <= reset;
+                  state <= mark_timeout_err;
                elsif (timeout = '1') then-- Timeout ocurred, so the mouse is not present, go to the reset state
-                  state <= reset;
+                  state <= mark_timeout_err;
                else
                   state <= check_read_id_wait_id;
                end if;
-
+            -- set new_event high
+            -- it will be reset in next state
+            -- informs client of a new event which could include the error flag
+            when mark_timeout_err =>
+               new_event <= '1';
+               err_mouse_not_present <= '1';
+               state <= reset;
             -- set new_event high
             -- it will be reset in next state
             -- informs client new packet received and processed

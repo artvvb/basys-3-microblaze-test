@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------
 -- ps2interface.vhd
 ------------------------------------------------------------------------
--- Author : Ulrich Zoltán
+-- Author : Ulrich Zoltï¿½n
 --          Copyright 2006 Digilent, Inc.
 ------------------------------------------------------------------------
 -- This file contains the implementation of a generic bidirectional
@@ -151,8 +151,8 @@ use UNISIM.VComponents.all;
 -- read above for behavioral description and port definitions.
 entity Ps2Interface is
 port(
-   ps2_clk  : inout std_logic;
-   ps2_data : inout std_logic;
+   ps2_clk_io  : inout std_logic;
+   ps2_data_io : inout std_logic;
 
    clk      : in std_logic;
    rst      : in std_logic;
@@ -251,6 +251,13 @@ constant parityrom : ROM := (
 -- SIGNALS
 ------------------------------------------------------------------------
 
+    signal ps2_clk_i : std_logic;
+    signal ps2_clk_o : std_logic;
+    signal ps2_clk_t : std_logic;
+    signal ps2_data_i : std_logic;
+    signal ps2_data_o : std_logic;
+    signal ps2_data_t : std_logic;
+
 -- 14 bits counter
 -- max value DELAY_100US
 -- used to wait 100us
@@ -343,7 +350,30 @@ signal clk_count,data_count: std_logic_vector(3 downto 0);
 signal clk_inter,data_inter: std_logic := '1';
 
 begin
-
+    IOBUF_ps2_clk_inst : IOBUF
+    generic map (
+        DRIVE => 12,
+        IOSTANDARD => "DEFAULT",
+        SLEW => "SLOW")
+    port map (
+        O => ps2_clk_i,     -- Buffer output
+        IO => ps2_clk_io,   -- Buffer inout port (connect directly to top-level port)
+        I => ps2_clk_o,     -- Buffer input
+        T => ps2_clk_t      -- 3-state enable input, high=input, low=output 
+    );
+    IOBUF_ps2_data_inst : IOBUF
+    generic map (
+        DRIVE => 12,
+        IOSTANDARD => "DEFAULT",
+        SLEW => "SLOW")
+    port map (
+        O  => ps2_data_i,    -- Buffer output
+        IO => ps2_data_io,   -- Buffer inout port (connect directly to top-level port)
+        I  => ps2_data_o,    -- Buffer input
+        T  => ps2_data_t     -- 3-state enable input, high=input, low=output 
+    );
+   
+   
    ---------------------------------------------------------------------
    -- FLAGS and PS2 CLOCK AND DATA LINES
    ---------------------------------------------------------------------
@@ -357,8 +387,8 @@ begin
          -- if the current bit on ps2_clk is different
          -- from the last value, then reset counter
          -- and retain value
-         if(ps2_clk /= clk_inter) then
-            clk_inter <= ps2_clk;
+         if(ps2_clk_i /= clk_inter) then
+            clk_inter <= ps2_clk_i;
             clk_count <= (others => '0');
          -- if counter reached upper limit, then
          -- the signal is clean
@@ -381,8 +411,8 @@ begin
          -- if the current bit on ps2_data is different
          -- from the last value, then reset counter
          -- and retain value
-         if(ps2_data /= data_inter) then
-            data_inter <= ps2_data;
+         if(ps2_data_i /= data_inter) then
+            data_inter <= ps2_data_i;
             data_count <= (others => '0');
          -- if counter reached upper limit, then
          -- the signal is clean
@@ -409,11 +439,14 @@ begin
 
    -- Force ps2_clk to '0' if ps2_clk_h = '0', else release the line
    -- ('Z' = +5Vcc because of pull-ups)
-   ps2_clk <= 'Z' when ps2_clk_h = '1' else '0';
-
+   --   ps2_clk <= 'Z' when ps2_clk_h = '1' else '0';
+    ps2_clk_t <= ps2_clk_h;
+    ps2_clk_o <= ps2_clk_h;
    -- Force ps2_data to '0' if ps2_data_h = '0', else release the line
    -- ('Z' = +5Vcc because of pull-ups)
-   ps2_data <= 'Z' when ps2_data_h = '1' else '0';
+   --   ps2_data <= 'Z' when ps2_data_h = '1' else '0';
+    ps2_data_t <= ps2_data_h;
+    ps2_data_o <= ps2_data_h;
 
    -- Control busy flag. Interface is not busy while in idle state.
    busy <= '0' when state = idle else '1';

@@ -169,15 +169,63 @@ module dio_test (
     end
 
     // This isn't an asyncrhonous design - maybe we can kill the sync flops to simplify the hardware loop paths
+    logic [7:0] ja_i;
+    logic [7:0] jb_i;
+    logic [7:0] jc_i;
+    logic [7:0] jxadc_i;
 
     genvar i;
     generate
         for (i=0; i<8; i=i+1) begin
-            // Infer tristate buffers, _t = 1 goes to input
-            assign ja[i] = (ja_t[i]) ? (1'bz) : (ja_o[i]);
-            assign jb[i] = (jb_t[i]) ? (1'bz) : (jb_o[i]);
-            assign jc[i] = (jc_t[i]) ? (1'bz) : (jc_o[i]);
-            assign jxadc[i] = (jxadc_t[i]) ? (1'bz) : (jxadc_o[i]);
+//            // Infer tristate buffers, _t = 1 goes to input
+//            assign ja[i] = (ja_t[i]) ? (1'bz) : (ja_o[i]);
+//            assign jb[i] = (jb_t[i]) ? (1'bz) : (jb_o[i]);
+//            assign jc[i] = (jc_t[i]) ? (1'bz) : (jc_o[i]);
+//            assign jxadc[i] = (jxadc_t[i]) ? (1'bz) : (jxadc_o[i]);
+           IOBUF #(
+              .DRIVE(12), // Specify the output drive strength
+              .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
+              .IOSTANDARD("DEFAULT"), // Specify the I/O standard
+              .SLEW("SLOW") // Specify the output slew rate
+           ) ja_IOBUF_inst (
+              .O(ja_i[i]),     // Buffer output
+              .IO(ja[i]),   // Buffer inout port (connect directly to top-level port)
+              .I(ja_o[i]),     // Buffer input
+              .T(ja_t[i])      // 3-state enable input, high=input, low=output
+           );
+           IOBUF #(
+              .DRIVE(12), // Specify the output drive strength
+              .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
+              .IOSTANDARD("DEFAULT"), // Specify the I/O standard
+              .SLEW("SLOW") // Specify the output slew rate
+           ) jb_IOBUF_inst (
+              .O(jb_i[i]),     // Buffer output
+              .IO(jb[i]),   // Buffer inout port (connect directly to top-level port)
+              .I(jb_o[i]),     // Buffer input
+              .T(jb_t[i])      // 3-state enable input, high=input, low=output
+           );
+           IOBUF #(
+              .DRIVE(12), // Specify the output drive strength
+              .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
+              .IOSTANDARD("DEFAULT"), // Specify the I/O standard
+              .SLEW("SLOW") // Specify the output slew rate
+           ) jc_IOBUF_inst (
+              .O(jc_i[i]),     // Buffer output
+              .IO(jc[i]),   // Buffer inout port (connect directly to top-level port)
+              .I(jc_o[i]),     // Buffer input
+              .T(jc_t[i])      // 3-state enable input, high=input, low=output
+           );
+           IOBUF #(
+              .DRIVE(12), // Specify the output drive strength
+              .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
+              .IOSTANDARD("DEFAULT"), // Specify the I/O standard
+              .SLEW("SLOW") // Specify the output slew rate
+           ) jxadc_IOBUF_inst (
+              .O(jxadc_i[i]),     // Buffer output
+              .IO(jxadc[i]),   // Buffer inout port (connect directly to top-level port)
+              .I(jxadc_o[i]),     // Buffer input
+              .T(jxadc_t[i])      // 3-state enable input, high=input, low=output
+           );
     
             // Resynchronize inputs
             always_ff @(posedge clk) begin
@@ -185,7 +233,7 @@ module dio_test (
                     ja_sync_flops[0][i] <= 'b0;
                     ja_sync_flops[1][i] <= 'b0;
                 end else begin
-                    ja_sync_flops[0][i] <= ja[i];
+                    ja_sync_flops[0][i] <= ja_i[i];
                     ja_sync_flops[1][i] <= ja_sync_flops[0][i];
                 end
             end
@@ -195,7 +243,7 @@ module dio_test (
                     jb_sync_flops[0][i] <= 'b0;
                     jb_sync_flops[1][i] <= 'b0;
                 end else begin
-                    jb_sync_flops[0][i] <= jb[i];
+                    jb_sync_flops[0][i] <= jb_i[i];
                     jb_sync_flops[1][i] <= jb_sync_flops[0][i];
                 end
             end
@@ -205,7 +253,7 @@ module dio_test (
                     jc_sync_flops[0][i] <= 'b0;
                     jc_sync_flops[1][i] <= 'b0;
                 end else begin
-                    jc_sync_flops[0][i] <= jc[i];
+                    jc_sync_flops[0][i] <= jc_i[i];
                     jc_sync_flops[1][i] <= jc_sync_flops[0][i];
                 end
             end
@@ -215,7 +263,7 @@ module dio_test (
                     jxadc_sync_flops[0][i] <= 'b0;
                     jxadc_sync_flops[1][i] <= 'b0;
                 end else begin
-                    jxadc_sync_flops[0][i] <= jxadc[i];
+                    jxadc_sync_flops[0][i] <= jxadc_i[i];
                     jxadc_sync_flops[1][i] <= jxadc_sync_flops[0][i];
                 end
             end

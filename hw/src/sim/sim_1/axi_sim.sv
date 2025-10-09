@@ -23,6 +23,8 @@
 module axi_sim;
     logic clk;
     logic reset;
+    logic pxl_clk;
+    logic pxl_clk_reset;
     logic [15:0] sw = 0;
     logic [15:0] led;
     logic [3:0]  vga_r;
@@ -81,6 +83,18 @@ module axi_sim;
         reset = 0;
         @(posedge clk) reset <= 1;
         @(posedge clk) reset <= 0;
+    end
+    
+    initial begin
+        pxl_clk = 0;
+        #8 pxl_clk = 1;
+        forever #4 pxl_clk = ~pxl_clk;
+    end
+    
+    initial begin
+        pxl_clk_reset = 0;
+        @(posedge pxl_clk) pxl_clk_reset <= 1;
+        @(posedge pxl_clk) pxl_clk_reset <= 0;
     end
     
     
@@ -155,7 +169,14 @@ module axi_sim;
         pass <= 'bz;
         axi_write(dut.DIO_SETTINGS_ADDR, {14'b0, 2'b00, 8'd3, 8'd7}); // {_, mode[1:0], output_phase[7:0], output_divider[7:0]}
         
-        
+        #100;
+        axi_read(dut.STATUS_ADDR, rdata);
+        #100;
+//        dut.ps2_to_axis_inst.new_event = 1;
+//        dut.ps2_to_axis_inst.mouse_x_pos = 0;
+//        dut.ps2_to_axis_inst.mouse_y_pos = 0;
+//        #100;
+        axi_read(dut.STATUS_ADDR, rdata);
         #100;
         axi_read(dut.PS2_POS_ADDR, rdata);
         flag <= 1;

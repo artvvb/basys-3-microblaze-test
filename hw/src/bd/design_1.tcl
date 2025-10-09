@@ -131,9 +131,7 @@ set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:ip:axi_uartlite:*\
-xilinx.com:ip:proc_sys_reset:*\
 xilinx.com:ip:axi_quad_spi:*\
-xilinx.com:ip:clk_wiz:*\
 xilinx.com:ip:microblaze:*\
 xilinx.com:ip:mdm:*\
 xilinx.com:ip:smartconnect:*\
@@ -142,6 +140,8 @@ xilinx.com:ip:xadc_wiz:*\
 xilinx.com:ip:lmb_v10:*\
 xilinx.com:ip:lmb_bram_if_cntlr:*\
 xilinx.com:ip:blk_mem_gen:*\
+xilinx.com:ip:proc_sys_reset:*\
+xilinx.com:ip:clk_wiz:*\
 "
 
    set list_ips_missing ""
@@ -195,6 +195,157 @@ if { $bCheckIPsPassed != 1 } {
 # DESIGN PROCs
 ##################################################################
 
+
+# Hierarchical cell: clocks
+proc create_hier_cell_clocks { parentCell nameHier } {
+
+  variable script_folder
+
+  if { $parentCell eq "" || $nameHier eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2092 -severity "ERROR" "create_hier_cell_clocks() - Empty argument(s)!"}
+     return
+  }
+
+  # Get object for parentCell
+  set parentObj [get_bd_cells $parentCell]
+  if { $parentObj == "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
+     return
+  }
+
+  # Make sure parentObj is hier blk
+  set parentType [get_property TYPE $parentObj]
+  if { $parentType ne "hier" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
+     return
+  }
+
+  # Save current instance; Restore later
+  set oldCurInst [current_bd_instance .]
+
+  # Set parent object as current
+  current_bd_instance $parentObj
+
+  # Create cell and set as current instance
+  set hier_obj [create_bd_cell -type hier $nameHier]
+  current_bd_instance $hier_obj
+
+  # Create interface pins
+
+  # Create pins
+  create_bd_pin -dir O -type clk clk_out1
+  create_bd_pin -dir I -type rst reset
+  create_bd_pin -dir O -from 0 -to 0 -type rst peripheral_aresetn
+  create_bd_pin -dir O -type clk clk_out2
+  create_bd_pin -dir I -type rst mb_debug_sys_rst
+  create_bd_pin -dir O -type rst mb_reset
+  create_bd_pin -dir O -from 0 -to 0 -type rst bus_struct_reset
+  create_bd_pin -dir O -from 0 -to 0 -type rst peripheral_aresetn1
+  create_bd_pin -dir I -type clk sys_clock
+
+  # Create instance: rst_clk_wiz_1_148M, and set properties
+  set rst_clk_wiz_1_148M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_clk_wiz_1_148M ]
+
+  # Create instance: proc_sys_reset_0, and set properties
+  set proc_sys_reset_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset proc_sys_reset_0 ]
+  set_property -dict [list \
+    CONFIG.RESET_BOARD_INTERFACE {reset} \
+    CONFIG.USE_BOARD_FLOW {true} \
+  ] $proc_sys_reset_0
+
+
+  # Create instance: clk_wiz_1, and set properties
+  set clk_wiz_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz clk_wiz_1 ]
+  set_property -dict [list \
+    CONFIG.CLKOUT1_DRIVES {BUFG} \
+    CONFIG.CLKOUT1_JITTER {217.614} \
+    CONFIG.CLKOUT1_PHASE_ERROR {245.344} \
+    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {148.500} \
+    CONFIG.CLKOUT2_DRIVES {BUFG} \
+    CONFIG.CLKOUT2_JITTER {368.995} \
+    CONFIG.CLKOUT2_PHASE_ERROR {479.985} \
+    CONFIG.CLKOUT2_USED {false} \
+    CONFIG.CLKOUT3_DRIVES {BUFG} \
+    CONFIG.CLKOUT4_DRIVES {BUFG} \
+    CONFIG.CLKOUT5_DRIVES {BUFG} \
+    CONFIG.CLKOUT6_DRIVES {BUFG} \
+    CONFIG.CLKOUT7_DRIVES {BUFG} \
+    CONFIG.FEEDBACK_SOURCE {FDBK_AUTO} \
+    CONFIG.MMCM_BANDWIDTH {OPTIMIZED} \
+    CONFIG.MMCM_CLKFBOUT_MULT_F {37.125} \
+    CONFIG.MMCM_CLKOUT0_DIVIDE_F {6.250} \
+    CONFIG.MMCM_CLKOUT1_DIVIDE {1} \
+    CONFIG.MMCM_COMPENSATION {ZHOLD} \
+    CONFIG.MMCM_DIVCLK_DIVIDE {4} \
+    CONFIG.NUM_OUT_CLKS {1} \
+    CONFIG.PRIMITIVE {MMCM} \
+    CONFIG.PRIM_SOURCE {Global_buffer} \
+  ] $clk_wiz_1
+
+
+  # Create instance: clk_wiz_2, and set properties
+  set clk_wiz_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz clk_wiz_2 ]
+  set_property -dict [list \
+    CONFIG.CLKOUT1_DRIVES {BUFG} \
+    CONFIG.CLKOUT1_JITTER {130.958} \
+    CONFIG.CLKOUT1_PHASE_ERROR {98.575} \
+    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100} \
+    CONFIG.CLKOUT2_DRIVES {BUFG} \
+    CONFIG.CLKOUT2_JITTER {368.995} \
+    CONFIG.CLKOUT2_PHASE_ERROR {479.985} \
+    CONFIG.CLKOUT2_USED {false} \
+    CONFIG.CLKOUT3_DRIVES {BUFG} \
+    CONFIG.CLKOUT4_DRIVES {BUFG} \
+    CONFIG.CLKOUT5_DRIVES {BUFG} \
+    CONFIG.CLKOUT6_DRIVES {BUFG} \
+    CONFIG.CLKOUT7_DRIVES {BUFG} \
+    CONFIG.CLK_IN1_BOARD_INTERFACE {sys_clock} \
+    CONFIG.FEEDBACK_SOURCE {FDBK_AUTO} \
+    CONFIG.MMCM_BANDWIDTH {OPTIMIZED} \
+    CONFIG.MMCM_CLKFBOUT_MULT_F {10.000} \
+    CONFIG.MMCM_CLKOUT0_DIVIDE_F {10.000} \
+    CONFIG.MMCM_CLKOUT1_DIVIDE {1} \
+    CONFIG.MMCM_COMPENSATION {ZHOLD} \
+    CONFIG.MMCM_DIVCLK_DIVIDE {1} \
+    CONFIG.NUM_OUT_CLKS {1} \
+    CONFIG.PRIMITIVE {MMCM} \
+    CONFIG.PRIM_SOURCE {Single_ended_clock_capable_pin} \
+  ] $clk_wiz_2
+
+
+  # Create port connections
+  connect_bd_net -net clk_wiz_1_clk_out1  [get_bd_pins clk_wiz_1/clk_out1] \
+  [get_bd_pins clk_out1] \
+  [get_bd_pins rst_clk_wiz_1_148M/slowest_sync_clk]
+  connect_bd_net -net clk_wiz_1_locked  [get_bd_pins clk_wiz_1/locked] \
+  [get_bd_pins rst_clk_wiz_1_148M/dcm_locked]
+  connect_bd_net -net clk_wiz_2_clk_out1  [get_bd_pins clk_wiz_2/clk_out1] \
+  [get_bd_pins clk_wiz_1/clk_in1] \
+  [get_bd_pins proc_sys_reset_0/slowest_sync_clk] \
+  [get_bd_pins clk_out2]
+  connect_bd_net -net clk_wiz_2_locked  [get_bd_pins clk_wiz_2/locked] \
+  [get_bd_pins proc_sys_reset_0/dcm_locked]
+  connect_bd_net -net mdm_1_debug_sys_rst  [get_bd_pins mb_debug_sys_rst] \
+  [get_bd_pins proc_sys_reset_0/mb_debug_sys_rst]
+  connect_bd_net -net proc_sys_reset_0_bus_struct_reset  [get_bd_pins proc_sys_reset_0/bus_struct_reset] \
+  [get_bd_pins bus_struct_reset]
+  connect_bd_net -net proc_sys_reset_0_mb_reset  [get_bd_pins proc_sys_reset_0/mb_reset] \
+  [get_bd_pins mb_reset]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn  [get_bd_pins proc_sys_reset_0/peripheral_aresetn] \
+  [get_bd_pins peripheral_aresetn1]
+  connect_bd_net -net reset_1  [get_bd_pins reset] \
+  [get_bd_pins proc_sys_reset_0/ext_reset_in] \
+  [get_bd_pins clk_wiz_1/reset] \
+  [get_bd_pins rst_clk_wiz_1_148M/ext_reset_in] \
+  [get_bd_pins clk_wiz_2/reset]
+  connect_bd_net -net rst_clk_wiz_1_148M_peripheral_aresetn  [get_bd_pins rst_clk_wiz_1_148M/peripheral_aresetn] \
+  [get_bd_pins peripheral_aresetn]
+  connect_bd_net -net sys_clock_1  [get_bd_pins sys_clock] \
+  [get_bd_pins clk_wiz_2/clk_in1]
+
+  # Restore current instance
+  current_bd_instance $oldCurInst
+}
 
 # Hierarchical cell: microblaze_0_local_memory
 proc create_hier_cell_microblaze_0_local_memory { parentCell nameHier } {
@@ -363,29 +514,12 @@ proc create_root_design { parentCell } {
   ] $axi_uartlite_0
 
 
-  # Create instance: proc_sys_reset_0, and set properties
-  set proc_sys_reset_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset proc_sys_reset_0 ]
-  set_property -dict [list \
-    CONFIG.RESET_BOARD_INTERFACE {reset} \
-    CONFIG.USE_BOARD_FLOW {true} \
-  ] $proc_sys_reset_0
-
-
   # Create instance: axi_quad_spi_0, and set properties
   set axi_quad_spi_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_quad_spi axi_quad_spi_0 ]
   set_property -dict [list \
     CONFIG.QSPI_BOARD_INTERFACE {qspi_flash} \
     CONFIG.USE_BOARD_FLOW {true} \
   ] $axi_quad_spi_0
-
-
-  # Create instance: clk_wiz_0, and set properties
-  set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz clk_wiz_0 ]
-  set_property -dict [list \
-    CONFIG.CLK_IN1_BOARD_INTERFACE {sys_clock} \
-    CONFIG.RESET_BOARD_INTERFACE {reset} \
-    CONFIG.USE_BOARD_FLOW {true} \
-  ] $clk_wiz_0
 
 
   # Create instance: microblaze_0, and set properties
@@ -461,6 +595,9 @@ proc create_root_design { parentCell } {
   ] $xadc_wiz_0
 
 
+  # Create instance: clocks
+  create_hier_cell_clocks [current_bd_instance .] clocks
+
   # Create interface connections
   connect_bd_intf_net -intf_net Vp_Vn_0_1 [get_bd_intf_ports Vp_Vn_0] [get_bd_intf_pins xadc_wiz_0/Vp_Vn]
   connect_bd_intf_net -intf_net axi_quad_spi_0_SPI_0 [get_bd_intf_ports qspi_flash] [get_bd_intf_pins axi_quad_spi_0/SPI_0]
@@ -490,13 +627,12 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets microblaze_0_M_AXI_DP] [get_bd_i
   [get_bd_pins top_v_0/jc]
   connect_bd_net -net Net6  [get_bd_ports jxadc] \
   [get_bd_pins top_v_0/jxadc]
-  connect_bd_net -net clk_wiz_0_locked  [get_bd_pins clk_wiz_0/locked] \
-  [get_bd_pins proc_sys_reset_0/dcm_locked]
+  connect_bd_net -net clk_wiz_1_clk_out1  [get_bd_pins clocks/clk_out1] \
+  [get_bd_pins top_v_0/pxl_clk]
   connect_bd_net -net mdm_1_debug_sys_rst  [get_bd_pins mdm_1/Debug_SYS_Rst] \
-  [get_bd_pins proc_sys_reset_0/mb_debug_sys_rst]
-  connect_bd_net -net microblaze_0_Clk  [get_bd_pins clk_wiz_0/clk_out1] \
+  [get_bd_pins clocks/mb_debug_sys_rst]
+  connect_bd_net -net microblaze_0_Clk  [get_bd_pins clocks/clk_out2] \
   [get_bd_pins axi_quad_spi_0/ext_spi_clk] \
-  [get_bd_pins proc_sys_reset_0/slowest_sync_clk] \
   [get_bd_pins microblaze_0/Clk] \
   [get_bd_pins microblaze_0_local_memory/LMB_Clk] \
   [get_bd_pins axi_smc/aclk] \
@@ -505,25 +641,25 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets microblaze_0_M_AXI_DP] [get_bd_i
   [get_bd_pins system_ila_0/clk] \
   [get_bd_pins xadc_wiz_0/s_axi_aclk] \
   [get_bd_pins top_v_0/control_aclk]
-  connect_bd_net -net proc_sys_reset_0_bus_struct_reset  [get_bd_pins proc_sys_reset_0/bus_struct_reset] \
+  connect_bd_net -net proc_sys_reset_0_bus_struct_reset  [get_bd_pins clocks/bus_struct_reset] \
   [get_bd_pins microblaze_0_local_memory/SYS_Rst]
-  connect_bd_net -net proc_sys_reset_0_mb_reset  [get_bd_pins proc_sys_reset_0/mb_reset] \
+  connect_bd_net -net proc_sys_reset_0_mb_reset  [get_bd_pins clocks/mb_reset] \
   [get_bd_pins microblaze_0/Reset]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn  [get_bd_pins proc_sys_reset_0/peripheral_aresetn] \
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn  [get_bd_pins clocks/peripheral_aresetn1] \
   [get_bd_pins axi_smc/aresetn] \
   [get_bd_pins axi_quad_spi_0/s_axi_aresetn] \
   [get_bd_pins axi_uartlite_0/s_axi_aresetn] \
   [get_bd_pins system_ila_0/resetn] \
   [get_bd_pins xadc_wiz_0/s_axi_aresetn] \
   [get_bd_pins top_v_0/control_aresetn]
-  connect_bd_net -net proc_sys_reset_0_peripheral_reset  [get_bd_pins proc_sys_reset_0/peripheral_reset]
   connect_bd_net -net reset_1  [get_bd_ports reset] \
-  [get_bd_pins proc_sys_reset_0/ext_reset_in] \
-  [get_bd_pins clk_wiz_0/reset]
+  [get_bd_pins clocks/reset]
+  connect_bd_net -net rst_clk_wiz_1_148M_peripheral_aresetn  [get_bd_pins clocks/peripheral_aresetn] \
+  [get_bd_pins top_v_0/pxl_clk_reset]
   connect_bd_net -net sw_0_1  [get_bd_ports sw] \
   [get_bd_pins top_v_0/sw]
   connect_bd_net -net sys_clock_1  [get_bd_ports sys_clock] \
-  [get_bd_pins clk_wiz_0/clk_in1]
+  [get_bd_pins clocks/sys_clock]
   connect_bd_net -net top_v_0_an  [get_bd_pins top_v_0/an] \
   [get_bd_ports an]
   connect_bd_net -net top_v_0_led  [get_bd_pins top_v_0/led] \

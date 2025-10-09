@@ -23,6 +23,8 @@
 module top (
     input  logic        clk,
     input  logic        reset,
+    input  logic        pxl_clk,
+    input  logic        pxl_clk_reset,
     
     input  logic [15:0] sw,
     output logic [15:0] led,
@@ -258,10 +260,11 @@ module top (
     logic pxl_clk;
     logic [11:0] mouse_x_pos;
     logic [11:0] mouse_y_pos;
+    logic mouse_err;
     logic new_event;
     
     vga_ctrl vga_inst (
-        .CLK_I          (clk),
+        .CLK_I          (pxl_clk),
         .VGA_HS_O       (vga_hs),
         .VGA_VS_O       (vga_vs),
         .VGA_RED_O      (vga_r),
@@ -272,6 +275,7 @@ module top (
         .PXL_CLK_O      (pxl_clk),
         .MOUSE_X_POS_O  (mouse_x_pos),
         .MOUSE_Y_POS_O  (mouse_y_pos),
+        .MOUSE_ERR_O    (mouse_err),
         .NEW_EVENT_O    (new_event)
     );
     
@@ -279,8 +283,10 @@ module top (
         .clk                    (clk),
         .reset                  (reset),
         .pxl_clk                (pxl_clk),
+        .pxl_clk_reset          (pxl_clk_reset),
         .mouse_x_pos            (mouse_x_pos),
         .mouse_y_pos            (mouse_y_pos),
+        .mouse_err              (mouse_err),
         .new_event              (new_event),
         .ps2_pos_tdata          (ps2_pos_tdata), 
         .ps2_pos_tvalid         (ps2_pos_tvalid),

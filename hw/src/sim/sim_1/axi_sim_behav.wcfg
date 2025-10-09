@@ -1,0 +1,951 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="axi_sim_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="axi_sim" />
+            <top_module name="glbl" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="201.000001 us"></ZoomEndTime>
+      <Cursor1Time time="100.360000 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="324"></NameColumnWidth>
+      <ValueColumnWidth column_width="104"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="5" />
+   <wvobject fp_name="group84" type="group">
+      <obj_property name="label">SIM</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/axi_sim/clk" type="logic">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/reset" type="logic">
+         <obj_property name="ElementShortName">reset</obj_property>
+         <obj_property name="ObjectShortName">reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/pxl_clk" type="logic">
+         <obj_property name="ElementShortName">pxl_clk</obj_property>
+         <obj_property name="ObjectShortName">pxl_clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/pxl_clk_reset" type="logic">
+         <obj_property name="ElementShortName">pxl_clk_reset</obj_property>
+         <obj_property name="ObjectShortName">pxl_clk_reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/ja" type="array">
+         <obj_property name="ElementShortName">ja[7:0]</obj_property>
+         <obj_property name="ObjectShortName">ja[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/jb" type="array">
+         <obj_property name="ElementShortName">jb[7:0]</obj_property>
+         <obj_property name="ObjectShortName">jb[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/jc" type="array">
+         <obj_property name="ElementShortName">jc[7:0]</obj_property>
+         <obj_property name="ObjectShortName">jc[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/jxadc" type="array">
+         <obj_property name="ElementShortName">jxadc[7:0]</obj_property>
+         <obj_property name="ObjectShortName">jxadc[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/mode" type="array">
+         <obj_property name="ElementShortName">mode[31:0]</obj_property>
+         <obj_property name="ObjectShortName">mode[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/ps2_clk" type="logic">
+         <obj_property name="ElementShortName">ps2_clk</obj_property>
+         <obj_property name="ObjectShortName">ps2_clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/ps2_data" type="logic">
+         <obj_property name="ElementShortName">ps2_data</obj_property>
+         <obj_property name="ObjectShortName">ps2_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/vp_in" type="logic">
+         <obj_property name="ElementShortName">vp_in</obj_property>
+         <obj_property name="ObjectShortName">vp_in</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/vn_in" type="logic">
+         <obj_property name="ElementShortName">vn_in</obj_property>
+         <obj_property name="ObjectShortName">vn_in</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/seg" type="array">
+         <obj_property name="ElementShortName">seg[7:0]</obj_property>
+         <obj_property name="ObjectShortName">seg[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/an" type="array">
+         <obj_property name="ElementShortName">an[3:0]</obj_property>
+         <obj_property name="ObjectShortName">an[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_awaddr" type="array">
+         <obj_property name="ElementShortName">control_awaddr[7:0]</obj_property>
+         <obj_property name="ObjectShortName">control_awaddr[7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_awvalid" type="logic">
+         <obj_property name="ElementShortName">control_awvalid</obj_property>
+         <obj_property name="ObjectShortName">control_awvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_awready" type="logic">
+         <obj_property name="ElementShortName">control_awready</obj_property>
+         <obj_property name="ObjectShortName">control_awready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_wdata" type="array">
+         <obj_property name="ElementShortName">control_wdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">control_wdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_wvalid" type="logic">
+         <obj_property name="ElementShortName">control_wvalid</obj_property>
+         <obj_property name="ObjectShortName">control_wvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_wready" type="logic">
+         <obj_property name="ElementShortName">control_wready</obj_property>
+         <obj_property name="ObjectShortName">control_wready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_bresp" type="array">
+         <obj_property name="ElementShortName">control_bresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">control_bresp[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_bvalid" type="logic">
+         <obj_property name="ElementShortName">control_bvalid</obj_property>
+         <obj_property name="ObjectShortName">control_bvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_bready" type="logic">
+         <obj_property name="ElementShortName">control_bready</obj_property>
+         <obj_property name="ObjectShortName">control_bready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_araddr" type="array">
+         <obj_property name="ElementShortName">control_araddr[7:0]</obj_property>
+         <obj_property name="ObjectShortName">control_araddr[7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_arvalid" type="logic">
+         <obj_property name="ElementShortName">control_arvalid</obj_property>
+         <obj_property name="ObjectShortName">control_arvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_arready" type="logic">
+         <obj_property name="ElementShortName">control_arready</obj_property>
+         <obj_property name="ObjectShortName">control_arready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_rdata" type="array">
+         <obj_property name="ElementShortName">control_rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">control_rdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_rvalid" type="logic">
+         <obj_property name="ElementShortName">control_rvalid</obj_property>
+         <obj_property name="ObjectShortName">control_rvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_rready" type="logic">
+         <obj_property name="ElementShortName">control_rready</obj_property>
+         <obj_property name="ObjectShortName">control_rready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/control_rresp" type="array">
+         <obj_property name="ElementShortName">control_rresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">control_rresp[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/rdata" type="array">
+         <obj_property name="ElementShortName">rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/flag" type="logic">
+         <obj_property name="ElementShortName">flag</obj_property>
+         <obj_property name="ObjectShortName">flag</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/pass" type="logic">
+         <obj_property name="ElementShortName">pass</obj_property>
+         <obj_property name="ObjectShortName">pass</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group159" type="group">
+      <obj_property name="label">DUT</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/axi_sim/dut/clk" type="logic">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/reset" type="logic">
+         <obj_property name="ElementShortName">reset</obj_property>
+         <obj_property name="ObjectShortName">reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/pxl_clk" type="logic">
+         <obj_property name="ElementShortName">pxl_clk</obj_property>
+         <obj_property name="ObjectShortName">pxl_clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/pxl_clk_reset" type="logic">
+         <obj_property name="ElementShortName">pxl_clk_reset</obj_property>
+         <obj_property name="ObjectShortName">pxl_clk_reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/sw" type="array">
+         <obj_property name="ElementShortName">sw[15:0]</obj_property>
+         <obj_property name="ObjectShortName">sw[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/led" type="array">
+         <obj_property name="ElementShortName">led[15:0]</obj_property>
+         <obj_property name="ObjectShortName">led[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_r" type="array">
+         <obj_property name="ElementShortName">vga_r[3:0]</obj_property>
+         <obj_property name="ObjectShortName">vga_r[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_g" type="array">
+         <obj_property name="ElementShortName">vga_g[3:0]</obj_property>
+         <obj_property name="ObjectShortName">vga_g[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_b" type="array">
+         <obj_property name="ElementShortName">vga_b[3:0]</obj_property>
+         <obj_property name="ObjectShortName">vga_b[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_hs" type="logic">
+         <obj_property name="ElementShortName">vga_hs</obj_property>
+         <obj_property name="ObjectShortName">vga_hs</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_vs" type="logic">
+         <obj_property name="ElementShortName">vga_vs</obj_property>
+         <obj_property name="ObjectShortName">vga_vs</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ja" type="array">
+         <obj_property name="ElementShortName">ja[7:0]</obj_property>
+         <obj_property name="ObjectShortName">ja[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/jb" type="array">
+         <obj_property name="ElementShortName">jb[7:0]</obj_property>
+         <obj_property name="ObjectShortName">jb[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/jc" type="array">
+         <obj_property name="ElementShortName">jc[7:0]</obj_property>
+         <obj_property name="ObjectShortName">jc[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/jxadc" type="array">
+         <obj_property name="ElementShortName">jxadc[7:0]</obj_property>
+         <obj_property name="ObjectShortName">jxadc[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_clk" type="logic">
+         <obj_property name="ElementShortName">ps2_clk</obj_property>
+         <obj_property name="ObjectShortName">ps2_clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_data" type="logic">
+         <obj_property name="ElementShortName">ps2_data</obj_property>
+         <obj_property name="ObjectShortName">ps2_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/seg" type="array">
+         <obj_property name="ElementShortName">seg[7:0]</obj_property>
+         <obj_property name="ObjectShortName">seg[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/an" type="array">
+         <obj_property name="ElementShortName">an[3:0]</obj_property>
+         <obj_property name="ObjectShortName">an[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_awaddr" type="array">
+         <obj_property name="ElementShortName">control_awaddr[7:0]</obj_property>
+         <obj_property name="ObjectShortName">control_awaddr[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_awvalid" type="logic">
+         <obj_property name="ElementShortName">control_awvalid</obj_property>
+         <obj_property name="ObjectShortName">control_awvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_awready" type="logic">
+         <obj_property name="ElementShortName">control_awready</obj_property>
+         <obj_property name="ObjectShortName">control_awready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_wdata" type="array">
+         <obj_property name="ElementShortName">control_wdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">control_wdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_wvalid" type="logic">
+         <obj_property name="ElementShortName">control_wvalid</obj_property>
+         <obj_property name="ObjectShortName">control_wvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_wready" type="logic">
+         <obj_property name="ElementShortName">control_wready</obj_property>
+         <obj_property name="ObjectShortName">control_wready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_bresp" type="array">
+         <obj_property name="ElementShortName">control_bresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">control_bresp[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_bvalid" type="logic">
+         <obj_property name="ElementShortName">control_bvalid</obj_property>
+         <obj_property name="ObjectShortName">control_bvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_bready" type="logic">
+         <obj_property name="ElementShortName">control_bready</obj_property>
+         <obj_property name="ObjectShortName">control_bready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_araddr" type="array">
+         <obj_property name="ElementShortName">control_araddr[7:0]</obj_property>
+         <obj_property name="ObjectShortName">control_araddr[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_arvalid" type="logic">
+         <obj_property name="ElementShortName">control_arvalid</obj_property>
+         <obj_property name="ObjectShortName">control_arvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_arready" type="logic">
+         <obj_property name="ElementShortName">control_arready</obj_property>
+         <obj_property name="ObjectShortName">control_arready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_rdata" type="array">
+         <obj_property name="ElementShortName">control_rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">control_rdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_rvalid" type="logic">
+         <obj_property name="ElementShortName">control_rvalid</obj_property>
+         <obj_property name="ObjectShortName">control_rvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_rready" type="logic">
+         <obj_property name="ElementShortName">control_rready</obj_property>
+         <obj_property name="ObjectShortName">control_rready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/control_rresp" type="array">
+         <obj_property name="ElementShortName">control_rresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">control_rresp[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/wdata_reg" type="array">
+         <obj_property name="ElementShortName">wdata_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wdata_reg[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/awaddr_reg" type="array">
+         <obj_property name="ElementShortName">awaddr_reg[7:0]</obj_property>
+         <obj_property name="ObjectShortName">awaddr_reg[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/araddr_reg" type="array">
+         <obj_property name="ElementShortName">araddr_reg[7:0]</obj_property>
+         <obj_property name="ObjectShortName">araddr_reg[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/w_state" type="array">
+         <obj_property name="ElementShortName">w_state[31:0]</obj_property>
+         <obj_property name="ObjectShortName">w_state[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/r_state" type="array">
+         <obj_property name="ElementShortName">r_state[31:0]</obj_property>
+         <obj_property name="ObjectShortName">r_state[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/write_strobe" type="logic">
+         <obj_property name="ElementShortName">write_strobe</obj_property>
+         <obj_property name="ObjectShortName">write_strobe</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/read_strobe" type="logic">
+         <obj_property name="ElementShortName">read_strobe</obj_property>
+         <obj_property name="ObjectShortName">read_strobe</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/xadc_set_addr_tdata" type="array">
+         <obj_property name="ElementShortName">xadc_set_addr_tdata[7:0]</obj_property>
+         <obj_property name="ObjectShortName">xadc_set_addr_tdata[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/xadc_set_addr_tvalid" type="logic">
+         <obj_property name="ElementShortName">xadc_set_addr_tvalid</obj_property>
+         <obj_property name="ObjectShortName">xadc_set_addr_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/xadc_set_addr_tready" type="logic">
+         <obj_property name="ElementShortName">xadc_set_addr_tready</obj_property>
+         <obj_property name="ObjectShortName">xadc_set_addr_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/xadc_tdata" type="array">
+         <obj_property name="ElementShortName">xadc_tdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">xadc_tdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/xadc_tvalid" type="logic">
+         <obj_property name="ElementShortName">xadc_tvalid</obj_property>
+         <obj_property name="ObjectShortName">xadc_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/xadc_tready" type="logic">
+         <obj_property name="ElementShortName">xadc_tready</obj_property>
+         <obj_property name="ObjectShortName">xadc_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/dio_settings_tdata" type="array">
+         <obj_property name="ElementShortName">dio_settings_tdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">dio_settings_tdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/dio_settings_tvalid" type="logic">
+         <obj_property name="ElementShortName">dio_settings_tvalid</obj_property>
+         <obj_property name="ObjectShortName">dio_settings_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/dio_settings_tready" type="logic">
+         <obj_property name="ElementShortName">dio_settings_tready</obj_property>
+         <obj_property name="ObjectShortName">dio_settings_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/dio_status_tdata" type="array">
+         <obj_property name="ElementShortName">dio_status_tdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">dio_status_tdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/dio_status_tvalid" type="logic">
+         <obj_property name="ElementShortName">dio_status_tvalid</obj_property>
+         <obj_property name="ObjectShortName">dio_status_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/dio_status_tready" type="logic">
+         <obj_property name="ElementShortName">dio_status_tready</obj_property>
+         <obj_property name="ObjectShortName">dio_status_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_pos_tdata" type="array">
+         <obj_property name="ElementShortName">ps2_pos_tdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ps2_pos_tdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_pos_tvalid" type="logic">
+         <obj_property name="ElementShortName">ps2_pos_tvalid</obj_property>
+         <obj_property name="ObjectShortName">ps2_pos_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_pos_tready" type="logic">
+         <obj_property name="ElementShortName">ps2_pos_tready</obj_property>
+         <obj_property name="ObjectShortName">ps2_pos_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/bram_seed_tdata" type="array">
+         <obj_property name="ElementShortName">bram_seed_tdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">bram_seed_tdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/bram_seed_tvalid" type="logic">
+         <obj_property name="ElementShortName">bram_seed_tvalid</obj_property>
+         <obj_property name="ObjectShortName">bram_seed_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/bram_seed_tready" type="logic">
+         <obj_property name="ElementShortName">bram_seed_tready</obj_property>
+         <obj_property name="ObjectShortName">bram_seed_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/bram_status_tdata" type="array">
+         <obj_property name="ElementShortName">bram_status_tdata[7:0]</obj_property>
+         <obj_property name="ObjectShortName">bram_status_tdata[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/bram_status_tvalid" type="logic">
+         <obj_property name="ElementShortName">bram_status_tvalid</obj_property>
+         <obj_property name="ObjectShortName">bram_status_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/bram_status_tready" type="logic">
+         <obj_property name="ElementShortName">bram_status_tready</obj_property>
+         <obj_property name="ObjectShortName">bram_status_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/mouse_x_pos" type="array">
+         <obj_property name="ElementShortName">mouse_x_pos[11:0]</obj_property>
+         <obj_property name="ObjectShortName">mouse_x_pos[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/mouse_y_pos" type="array">
+         <obj_property name="ElementShortName">mouse_y_pos[11:0]</obj_property>
+         <obj_property name="ObjectShortName">mouse_y_pos[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/new_event" type="logic">
+         <obj_property name="ElementShortName">new_event</obj_property>
+         <obj_property name="ObjectShortName">new_event</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group477" type="group">
+      <obj_property name="label">PS2_CTL</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/clk" type="logic">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/rst" type="logic">
+         <obj_property name="ElementShortName">rst</obj_property>
+         <obj_property name="ObjectShortName">rst</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/xpos" type="array">
+         <obj_property name="ElementShortName">xpos[11:0]</obj_property>
+         <obj_property name="ObjectShortName">xpos[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/ypos" type="array">
+         <obj_property name="ElementShortName">ypos[11:0]</obj_property>
+         <obj_property name="ObjectShortName">ypos[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/zpos" type="array">
+         <obj_property name="ElementShortName">zpos[3:0]</obj_property>
+         <obj_property name="ObjectShortName">zpos[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/left" type="logic">
+         <obj_property name="ElementShortName">left</obj_property>
+         <obj_property name="ObjectShortName">left</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/middle" type="logic">
+         <obj_property name="ElementShortName">middle</obj_property>
+         <obj_property name="ObjectShortName">middle</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/right" type="logic">
+         <obj_property name="ElementShortName">right</obj_property>
+         <obj_property name="ObjectShortName">right</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/err_mouse_not_present" type="logic">
+         <obj_property name="ElementShortName">err_mouse_not_present</obj_property>
+         <obj_property name="ObjectShortName">err_mouse_not_present</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/new_event" type="logic">
+         <obj_property name="ElementShortName">new_event</obj_property>
+         <obj_property name="ObjectShortName">new_event</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/value" type="array">
+         <obj_property name="ElementShortName">value[11:0]</obj_property>
+         <obj_property name="ObjectShortName">value[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/setx" type="logic">
+         <obj_property name="ElementShortName">setx</obj_property>
+         <obj_property name="ObjectShortName">setx</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/sety" type="logic">
+         <obj_property name="ElementShortName">sety</obj_property>
+         <obj_property name="ObjectShortName">sety</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/setmax_x" type="logic">
+         <obj_property name="ElementShortName">setmax_x</obj_property>
+         <obj_property name="ObjectShortName">setmax_x</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/setmax_y" type="logic">
+         <obj_property name="ElementShortName">setmax_y</obj_property>
+         <obj_property name="ObjectShortName">setmax_y</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/ps2_clk" type="logic">
+         <obj_property name="ElementShortName">ps2_clk</obj_property>
+         <obj_property name="ObjectShortName">ps2_clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/ps2_data" type="logic">
+         <obj_property name="ElementShortName">ps2_data</obj_property>
+         <obj_property name="ObjectShortName">ps2_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/haswheel" type="logic">
+         <obj_property name="ElementShortName">haswheel</obj_property>
+         <obj_property name="ObjectShortName">haswheel</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/x_pos" type="array">
+         <obj_property name="ElementShortName">x_pos[11:0]</obj_property>
+         <obj_property name="ObjectShortName">x_pos[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/y_pos" type="array">
+         <obj_property name="ElementShortName">y_pos[11:0]</obj_property>
+         <obj_property name="ObjectShortName">y_pos[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/x_overflow" type="logic">
+         <obj_property name="ElementShortName">x_overflow</obj_property>
+         <obj_property name="ObjectShortName">x_overflow</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/y_overflow" type="logic">
+         <obj_property name="ElementShortName">y_overflow</obj_property>
+         <obj_property name="ObjectShortName">y_overflow</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/x_sign" type="logic">
+         <obj_property name="ElementShortName">x_sign</obj_property>
+         <obj_property name="ObjectShortName">x_sign</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/y_sign" type="logic">
+         <obj_property name="ElementShortName">y_sign</obj_property>
+         <obj_property name="ObjectShortName">y_sign</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/x_inc" type="array">
+         <obj_property name="ElementShortName">x_inc[7:0]</obj_property>
+         <obj_property name="ObjectShortName">x_inc[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/y_inc" type="array">
+         <obj_property name="ElementShortName">y_inc[7:0]</obj_property>
+         <obj_property name="ObjectShortName">y_inc[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/x_new" type="logic">
+         <obj_property name="ElementShortName">x_new</obj_property>
+         <obj_property name="ObjectShortName">x_new</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/y_new" type="logic">
+         <obj_property name="ElementShortName">y_new</obj_property>
+         <obj_property name="ObjectShortName">y_new</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/x_max" type="array">
+         <obj_property name="ElementShortName">x_max[11:0]</obj_property>
+         <obj_property name="ObjectShortName">x_max[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/y_max" type="array">
+         <obj_property name="ElementShortName">y_max[11:0]</obj_property>
+         <obj_property name="ObjectShortName">y_max[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/left_down" type="logic">
+         <obj_property name="ElementShortName">left_down</obj_property>
+         <obj_property name="ObjectShortName">left_down</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/middle_down" type="logic">
+         <obj_property name="ElementShortName">middle_down</obj_property>
+         <obj_property name="ObjectShortName">middle_down</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/right_down" type="logic">
+         <obj_property name="ElementShortName">right_down</obj_property>
+         <obj_property name="ObjectShortName">right_down</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/state" type="other">
+         <obj_property name="ElementShortName">state</obj_property>
+         <obj_property name="ObjectShortName">state</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/read_data" type="logic">
+         <obj_property name="ElementShortName">read_data</obj_property>
+         <obj_property name="ObjectShortName">read_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/err" type="logic">
+         <obj_property name="ElementShortName">err</obj_property>
+         <obj_property name="ObjectShortName">err</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/rx_data" type="array">
+         <obj_property name="ElementShortName">rx_data[7:0]</obj_property>
+         <obj_property name="ObjectShortName">rx_data[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/tx_data" type="array">
+         <obj_property name="ElementShortName">tx_data[7:0]</obj_property>
+         <obj_property name="ObjectShortName">tx_data[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/write_data" type="logic">
+         <obj_property name="ElementShortName">write_data</obj_property>
+         <obj_property name="ObjectShortName">write_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/periodic_check_cnt" type="other">
+         <obj_property name="ElementShortName">periodic_check_cnt</obj_property>
+         <obj_property name="ObjectShortName">periodic_check_cnt</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/reset_periodic_check_cnt" type="logic">
+         <obj_property name="ElementShortName">reset_periodic_check_cnt</obj_property>
+         <obj_property name="ObjectShortName">reset_periodic_check_cnt</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/periodic_check_tick" type="logic">
+         <obj_property name="ElementShortName">periodic_check_tick</obj_property>
+         <obj_property name="ObjectShortName">periodic_check_tick</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/timeout_cnt" type="other">
+         <obj_property name="ElementShortName">timeout_cnt</obj_property>
+         <obj_property name="ObjectShortName">timeout_cnt</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/reset_timeout_cnt" type="logic">
+         <obj_property name="ElementShortName">reset_timeout_cnt</obj_property>
+         <obj_property name="ObjectShortName">reset_timeout_cnt</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/timeout" type="logic">
+         <obj_property name="ElementShortName">timeout</obj_property>
+         <obj_property name="ObjectShortName">timeout</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/SYSCLK_FREQUENCY_HZ" type="other">
+         <obj_property name="ElementShortName">SYSCLK_FREQUENCY_HZ</obj_property>
+         <obj_property name="ObjectShortName">SYSCLK_FREQUENCY_HZ</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/CHECK_PERIOD_MS" type="other">
+         <obj_property name="ElementShortName">CHECK_PERIOD_MS</obj_property>
+         <obj_property name="ObjectShortName">CHECK_PERIOD_MS</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/TIMEOUT_PERIOD_MS" type="other">
+         <obj_property name="ElementShortName">TIMEOUT_PERIOD_MS</obj_property>
+         <obj_property name="ObjectShortName">TIMEOUT_PERIOD_MS</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/FA" type="array">
+         <obj_property name="ElementShortName">FA[7:0]</obj_property>
+         <obj_property name="ObjectShortName">FA[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/FF" type="array">
+         <obj_property name="ElementShortName">FF[7:0]</obj_property>
+         <obj_property name="ObjectShortName">FF[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/AA" type="array">
+         <obj_property name="ElementShortName">AA[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AA[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/OO" type="array">
+         <obj_property name="ElementShortName">OO[7:0]</obj_property>
+         <obj_property name="ObjectShortName">OO[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/READ_ID" type="array">
+         <obj_property name="ElementShortName">READ_ID[7:0]</obj_property>
+         <obj_property name="ObjectShortName">READ_ID[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/ENABLE_REPORTING" type="array">
+         <obj_property name="ElementShortName">ENABLE_REPORTING[7:0]</obj_property>
+         <obj_property name="ObjectShortName">ENABLE_REPORTING[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/SET_RESOLUTION" type="array">
+         <obj_property name="ElementShortName">SET_RESOLUTION[7:0]</obj_property>
+         <obj_property name="ObjectShortName">SET_RESOLUTION[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/RESOLUTION" type="array">
+         <obj_property name="ElementShortName">RESOLUTION[7:0]</obj_property>
+         <obj_property name="ObjectShortName">RESOLUTION[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/SET_SAMPLE_RATE" type="array">
+         <obj_property name="ElementShortName">SET_SAMPLE_RATE[7:0]</obj_property>
+         <obj_property name="ObjectShortName">SET_SAMPLE_RATE[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/SAMPLE_RATE" type="array">
+         <obj_property name="ElementShortName">SAMPLE_RATE[7:0]</obj_property>
+         <obj_property name="ObjectShortName">SAMPLE_RATE[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/DEFAULT_MAX_X" type="array">
+         <obj_property name="ElementShortName">DEFAULT_MAX_X[11:0]</obj_property>
+         <obj_property name="ObjectShortName">DEFAULT_MAX_X[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/DEFAULT_MAX_Y" type="array">
+         <obj_property name="ElementShortName">DEFAULT_MAX_Y[11:0]</obj_property>
+         <obj_property name="ObjectShortName">DEFAULT_MAX_Y[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/CHECK_PERIOD_CLOCKS" type="other">
+         <obj_property name="ElementShortName">CHECK_PERIOD_CLOCKS</obj_property>
+         <obj_property name="ObjectShortName">CHECK_PERIOD_CLOCKS</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/TIMEOUT_PERIOD_CLOCKS" type="other">
+         <obj_property name="ElementShortName">TIMEOUT_PERIOD_CLOCKS</obj_property>
+         <obj_property name="ObjectShortName">TIMEOUT_PERIOD_CLOCKS</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group570" type="group">
+      <obj_property name="label">PS2_INTF</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/ps2_clk" type="logic">
+         <obj_property name="ElementShortName">ps2_clk</obj_property>
+         <obj_property name="ObjectShortName">ps2_clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/ps2_data" type="logic">
+         <obj_property name="ElementShortName">ps2_data</obj_property>
+         <obj_property name="ObjectShortName">ps2_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/clk" type="logic">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/rst" type="logic">
+         <obj_property name="ElementShortName">rst</obj_property>
+         <obj_property name="ObjectShortName">rst</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/tx_data" type="array">
+         <obj_property name="ElementShortName">tx_data[7:0]</obj_property>
+         <obj_property name="ObjectShortName">tx_data[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/write_data" type="logic">
+         <obj_property name="ElementShortName">write_data</obj_property>
+         <obj_property name="ObjectShortName">write_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/rx_data" type="array">
+         <obj_property name="ElementShortName">rx_data[7:0]</obj_property>
+         <obj_property name="ObjectShortName">rx_data[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/read_data" type="logic">
+         <obj_property name="ElementShortName">read_data</obj_property>
+         <obj_property name="ObjectShortName">read_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/busy" type="logic">
+         <obj_property name="ElementShortName">busy</obj_property>
+         <obj_property name="ObjectShortName">busy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/err" type="logic">
+         <obj_property name="ElementShortName">err</obj_property>
+         <obj_property name="ObjectShortName">err</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_100us_count" type="array">
+         <obj_property name="ElementShortName">delay_100us_count[13:0]</obj_property>
+         <obj_property name="ObjectShortName">delay_100us_count[13:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_20us_count" type="array">
+         <obj_property name="ElementShortName">delay_20us_count[10:0]</obj_property>
+         <obj_property name="ObjectShortName">delay_20us_count[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_63clk_count" type="array">
+         <obj_property name="ElementShortName">delay_63clk_count[6:0]</obj_property>
+         <obj_property name="ObjectShortName">delay_63clk_count[6:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_100us_done" type="logic">
+         <obj_property name="ElementShortName">delay_100us_done</obj_property>
+         <obj_property name="ObjectShortName">delay_100us_done</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_20us_done" type="logic">
+         <obj_property name="ElementShortName">delay_20us_done</obj_property>
+         <obj_property name="ObjectShortName">delay_20us_done</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_63clk_done" type="logic">
+         <obj_property name="ElementShortName">delay_63clk_done</obj_property>
+         <obj_property name="ObjectShortName">delay_63clk_done</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_100us_counter_enable" type="logic">
+         <obj_property name="ElementShortName">delay_100us_counter_enable</obj_property>
+         <obj_property name="ObjectShortName">delay_100us_counter_enable</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_20us_counter_enable" type="logic">
+         <obj_property name="ElementShortName">delay_20us_counter_enable</obj_property>
+         <obj_property name="ObjectShortName">delay_20us_counter_enable</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/delay_63clk_counter_enable" type="logic">
+         <obj_property name="ElementShortName">delay_63clk_counter_enable</obj_property>
+         <obj_property name="ObjectShortName">delay_63clk_counter_enable</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/ps2_clk_s" type="logic">
+         <obj_property name="ElementShortName">ps2_clk_s</obj_property>
+         <obj_property name="ObjectShortName">ps2_clk_s</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/ps2_data_s" type="logic">
+         <obj_property name="ElementShortName">ps2_data_s</obj_property>
+         <obj_property name="ObjectShortName">ps2_data_s</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/ps2_clk_h" type="logic">
+         <obj_property name="ElementShortName">ps2_clk_h</obj_property>
+         <obj_property name="ObjectShortName">ps2_clk_h</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/ps2_data_h" type="logic">
+         <obj_property name="ElementShortName">ps2_data_h</obj_property>
+         <obj_property name="ObjectShortName">ps2_data_h</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/state" type="other">
+         <obj_property name="ElementShortName">state</obj_property>
+         <obj_property name="ObjectShortName">state</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/frame" type="array">
+         <obj_property name="ElementShortName">frame[10:0]</obj_property>
+         <obj_property name="ObjectShortName">frame[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/bit_count" type="array">
+         <obj_property name="ElementShortName">bit_count[3:0]</obj_property>
+         <obj_property name="ObjectShortName">bit_count[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/reset_bit_count" type="logic">
+         <obj_property name="ElementShortName">reset_bit_count</obj_property>
+         <obj_property name="ObjectShortName">reset_bit_count</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/shift_frame" type="logic">
+         <obj_property name="ElementShortName">shift_frame</obj_property>
+         <obj_property name="ObjectShortName">shift_frame</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/rx_parity" type="logic">
+         <obj_property name="ElementShortName">rx_parity</obj_property>
+         <obj_property name="ObjectShortName">rx_parity</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/tx_parity" type="logic">
+         <obj_property name="ElementShortName">tx_parity</obj_property>
+         <obj_property name="ObjectShortName">tx_parity</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/load_tx_data" type="logic">
+         <obj_property name="ElementShortName">load_tx_data</obj_property>
+         <obj_property name="ObjectShortName">load_tx_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/load_rx_data" type="logic">
+         <obj_property name="ElementShortName">load_rx_data</obj_property>
+         <obj_property name="ObjectShortName">load_rx_data</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/ps2_clk_clean" type="logic">
+         <obj_property name="ElementShortName">ps2_clk_clean</obj_property>
+         <obj_property name="ObjectShortName">ps2_clk_clean</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/ps2_data_clean" type="logic">
+         <obj_property name="ElementShortName">ps2_data_clean</obj_property>
+         <obj_property name="ObjectShortName">ps2_data_clean</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/clk_count" type="array">
+         <obj_property name="ElementShortName">clk_count[3:0]</obj_property>
+         <obj_property name="ObjectShortName">clk_count[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/data_count" type="array">
+         <obj_property name="ElementShortName">data_count[3:0]</obj_property>
+         <obj_property name="ObjectShortName">data_count[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/clk_inter" type="logic">
+         <obj_property name="ElementShortName">clk_inter</obj_property>
+         <obj_property name="ObjectShortName">clk_inter</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/data_inter" type="logic">
+         <obj_property name="ElementShortName">data_inter</obj_property>
+         <obj_property name="ObjectShortName">data_inter</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/DELAY_100US" type="array">
+         <obj_property name="ElementShortName">DELAY_100US[13:0]</obj_property>
+         <obj_property name="ObjectShortName">DELAY_100US[13:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/DELAY_20US" type="array">
+         <obj_property name="ElementShortName">DELAY_20US[10:0]</obj_property>
+         <obj_property name="ObjectShortName">DELAY_20US[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/DELAY_63CLK" type="array">
+         <obj_property name="ElementShortName">DELAY_63CLK[6:0]</obj_property>
+         <obj_property name="ObjectShortName">DELAY_63CLK[6:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/DEBOUNCE_DELAY" type="array">
+         <obj_property name="ElementShortName">DEBOUNCE_DELAY[3:0]</obj_property>
+         <obj_property name="ObjectShortName">DEBOUNCE_DELAY[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/NUMBITS" type="array">
+         <obj_property name="ElementShortName">NUMBITS[3:0]</obj_property>
+         <obj_property name="ObjectShortName">NUMBITS[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/PARITY_BIT" type="other">
+         <obj_property name="ElementShortName">PARITY_BIT</obj_property>
+         <obj_property name="ObjectShortName">PARITY_BIT</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/vga_inst/Inst_MouseCtl/Inst_Ps2Interface/parityrom" type="array">
+         <obj_property name="ElementShortName">parityrom[0:255]</obj_property>
+         <obj_property name="ObjectShortName">parityrom[0:255]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group654" type="group">
+      <obj_property name="label">PS2_to_AXIS</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/clk" type="logic">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/reset" type="logic">
+         <obj_property name="ElementShortName">reset</obj_property>
+         <obj_property name="ObjectShortName">reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/pxl_clk" type="logic">
+         <obj_property name="ElementShortName">pxl_clk</obj_property>
+         <obj_property name="ObjectShortName">pxl_clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/pxl_clk_reset" type="logic">
+         <obj_property name="ElementShortName">pxl_clk_reset</obj_property>
+         <obj_property name="ObjectShortName">pxl_clk_reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/mouse_x_pos" type="array">
+         <obj_property name="ElementShortName">mouse_x_pos[11:0]</obj_property>
+         <obj_property name="ObjectShortName">mouse_x_pos[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/mouse_y_pos" type="array">
+         <obj_property name="ElementShortName">mouse_y_pos[11:0]</obj_property>
+         <obj_property name="ObjectShortName">mouse_y_pos[11:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/mouse_err" type="logic">
+         <obj_property name="ElementShortName">mouse_err</obj_property>
+         <obj_property name="ObjectShortName">mouse_err</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/new_event" type="logic">
+         <obj_property name="ElementShortName">new_event</obj_property>
+         <obj_property name="ObjectShortName">new_event</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/ps2_pos_tdata" type="array">
+         <obj_property name="ElementShortName">ps2_pos_tdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ps2_pos_tdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/ps2_pos_tvalid" type="logic">
+         <obj_property name="ElementShortName">ps2_pos_tvalid</obj_property>
+         <obj_property name="ObjectShortName">ps2_pos_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/ps2_pos_tready" type="logic">
+         <obj_property name="ElementShortName">ps2_pos_tready</obj_property>
+         <obj_property name="ObjectShortName">ps2_pos_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/pxl_tdata" type="array">
+         <obj_property name="ElementShortName">pxl_tdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">pxl_tdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/pxl_tvalid" type="logic">
+         <obj_property name="ElementShortName">pxl_tvalid</obj_property>
+         <obj_property name="ObjectShortName">pxl_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/pxl_tready" type="logic">
+         <obj_property name="ElementShortName">pxl_tready</obj_property>
+         <obj_property name="ObjectShortName">pxl_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/sys_tdata" type="array">
+         <obj_property name="ElementShortName">sys_tdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">sys_tdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/sys_tvalid" type="logic">
+         <obj_property name="ElementShortName">sys_tvalid</obj_property>
+         <obj_property name="ObjectShortName">sys_tvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/sys_tready" type="logic">
+         <obj_property name="ElementShortName">sys_tready</obj_property>
+         <obj_property name="ObjectShortName">sys_tready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/not_connected" type="logic">
+         <obj_property name="ElementShortName">not_connected</obj_property>
+         <obj_property name="ObjectShortName">not_connected</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_sim/dut/ps2_to_axis_inst/new_data" type="logic">
+         <obj_property name="ElementShortName">new_data</obj_property>
+         <obj_property name="ObjectShortName">new_data</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

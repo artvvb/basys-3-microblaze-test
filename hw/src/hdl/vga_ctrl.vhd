@@ -48,7 +48,8 @@ entity vga_ctrl is
            PXL_CLK_O : out STD_LOGIC;
            MOUSE_X_POS_O : out STD_LOGIC_VECTOR(11 downto 0);
            MOUSE_Y_POS_O : out STD_LOGIC_VECTOR(11 downto 0);
-           NEW_EVENT_O : out STD_LOGIC
+           NEW_EVENT_O : out STD_LOGIC;
+           MOUSE_ERR_O : out STD_LOGIC
            );
 end vga_ctrl;
 
@@ -77,6 +78,7 @@ architecture Behavioral of vga_ctrl is
       left : OUT std_logic;
       middle : OUT std_logic;
       right : OUT std_logic;
+      err_mouse_not_present : OUT std_logic;
       new_event : OUT std_logic
       );
   END COMPONENT;
@@ -95,14 +97,14 @@ architecture Behavioral of vga_ctrl is
       );
   END COMPONENT;
 
-component clk_wiz_0
-port
- (-- Clock in ports
-  clk_in1           : in     std_logic;
-  -- Clock out ports
-  clk_out1          : out    std_logic
- );
-end component;
+--component clk_wiz_0
+--port
+-- (-- Clock in ports
+--  clk_in1           : in     std_logic;
+--  -- Clock out ports
+--  clk_out1          : out    std_logic
+-- );
+--end component;
 
   --***1280x1024@60Hz***--
 --  constant FRAME_WIDTH : natural := 1280;
@@ -214,13 +216,14 @@ end component;
 begin
     MOUSE_X_POS_O <= MOUSE_X_POS;
     MOUSE_Y_POS_O <= MOUSE_Y_POS;
-    PXL_CLK_O <= pxl_clk;
     
-  clk_wiz_0_inst : clk_wiz_0
-  port map
-   (
-    clk_in1 => CLK_I,
-    clk_out1 => pxl_clk);
+    
+--  clk_wiz_0_inst : clk_wiz_0
+--  port map
+--   (
+--    clk_in1 => CLK_I,
+--    clk_out1 => pxl_clk);
+    pxl_clk <= CLK_I;
   
     
     ----------------------------------------------------------------------------------
@@ -244,6 +247,7 @@ begin
           left           => open,
           middle         => open,
           right          => open,
+          err_mouse_not_present => MOUSE_ERR_O,
           new_event      => NEW_EVENT_O,
           value          => x"000",
           setx           => '0',
