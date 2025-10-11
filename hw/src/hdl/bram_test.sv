@@ -21,7 +21,6 @@
 
 
 module bram_test #(
-    parameter logic [15:0] ADDR_MAX = 16'h3ff
 ) (
     input  logic        clk,
     input  logic        reset,
@@ -32,15 +31,17 @@ module bram_test #(
     output logic        status_tvalid,
     input  logic        status_tready
 );
+    localparam integer ADDR_WIDTH = 10;
+    localparam logic [ADDR_WIDTH-1:0] ADDR_MAX = 'h3ff;
 
     logic [31:0] seed;
     logic [31:0] wdata;
     logic [31:0] rdata;
     logic reset_busy;
-    logic [15:0] addr;
+    logic [ADDR_WIDTH-1:0] addr;
     logic wen, en;
     
-    localparam logic [15:0] ADDR_READ_VALID = 16'd2;
+    localparam logic [ADDR_WIDTH-1:0] ADDR_READ_VALID = 'd2;
     
     enum integer {
         RESET_BUSY,
@@ -123,7 +124,7 @@ module bram_test #(
         .rsta       (reset),        // input wire rsta
         .ena        (en),           // input wire ena
         .wea        (wen),          // input wire [0 : 0] wea
-        .addra      (addr),         // input wire [15 : 0] addra
+        .addra      (addr),         // input wire [ADDR_WIDTH-1 : 0] addra
         .dina       (wdata),        // input wire [31 : 0] dina
         .douta      (rdata),        // output wire [31 : 0] douta
         .rsta_busy  (reset_busy)    // output wire rsta_busy
