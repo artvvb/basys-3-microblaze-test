@@ -245,6 +245,8 @@ int ValidateAgainstLfsr(XSpi *SpiPtr, const uint32_t seed, uint32_t *error_count
 	uint8_t ReadBuffer[row_size + READ_WRITE_EXTRA_BYTES];
 	uint8_t WriteBuffer[row_size + READ_WRITE_EXTRA_BYTES];
 
+	SpiFlashQuadEnable(SpiPtr);
+
 	for (uint32_t addr = 0; addr < flash_size; addr += row_size)
 	{
 		uint32_t *dataptr = (uint32_t*)(ReadBuffer + READ_WRITE_EXTRA_BYTES);

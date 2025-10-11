@@ -655,7 +655,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets microblaze_0_M_AXI_DP] [get_bd_i
   connect_bd_net -net reset_1  [get_bd_ports reset] \
   [get_bd_pins clocks/reset]
   connect_bd_net -net rst_clk_wiz_1_148M_peripheral_aresetn  [get_bd_pins clocks/peripheral_aresetn] \
-  [get_bd_pins top_v_0/pxl_clk_reset]
+  [get_bd_pins top_v_0/pxl_clk_aresetn]
   connect_bd_net -net sw_0_1  [get_bd_ports sw] \
   [get_bd_pins top_v_0/sw]
   connect_bd_net -net sys_clock_1  [get_bd_ports sys_clock] \

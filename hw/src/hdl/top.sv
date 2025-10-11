@@ -24,7 +24,7 @@ module top (
     input  logic        clk,
     input  logic        reset,
     input  logic        pxl_clk,
-    input  logic        pxl_clk_reset,
+    input  logic        pxl_clk_aresetn,
     
     input  logic [15:0] sw,
     output logic [15:0] led,
@@ -69,6 +69,7 @@ module top (
     logic [31:0] wdata_reg;
     logic [7:0] awaddr_reg;
     logic [7:0] araddr_reg;
+    logic mouse_err_2;
     
     enum integer {
         INTF_AWREADY_AND_WREADY,
@@ -188,7 +189,7 @@ module top (
     logic [31:0] bram_seed_tdata;
     logic        bram_seed_tvalid;
     logic        bram_seed_tready;
-    logic [7:0]  bram_status_tdata;
+    logic [31:0] bram_status_tdata;
     logic        bram_status_tvalid;
     logic        bram_status_tready;
 
@@ -257,33 +258,45 @@ module top (
         .dio_counter_status_tready       (dio_status_tready)
     );
     
-    logic pxl_clk;
     logic [11:0] mouse_x_pos;
     logic [11:0] mouse_y_pos;
     logic mouse_err;
     logic new_event;
+    logic [15:0] ps2_status_dbg;
     
     vga_ctrl vga_inst (
-        .CLK_I          (pxl_clk),
-        .VGA_HS_O       (vga_hs),
-        .VGA_VS_O       (vga_vs),
-        .VGA_RED_O      (vga_r),
-        .VGA_GREEN_O    (vga_g),
-        .VGA_BLUE_O     (vga_b),
-        .PS2_CLK        (ps2_clk),
-        .PS2_DATA       (ps2_data),
-        .PXL_CLK_O      (pxl_clk),
-        .MOUSE_X_POS_O  (mouse_x_pos),
-        .MOUSE_Y_POS_O  (mouse_y_pos),
-        .MOUSE_ERR_O    (mouse_err),
-        .NEW_EVENT_O    (new_event)
+        .CLK_I              (pxl_clk),
+        .VGA_HS_O           (vga_hs),
+        .VGA_VS_O           (vga_vs),
+        .VGA_RED_O          (vga_r),
+        .VGA_GREEN_O        (vga_g),
+        .VGA_BLUE_O         (vga_b),
+        .PS2_CLK            (ps2_clk),
+        .PS2_DATA           (ps2_data),
+        .MOUSE_X_POS_O      (mouse_x_pos),
+        .MOUSE_Y_POS_O      (mouse_y_pos),
+        .MOUSE_ERR_O        (mouse_err),
+        .NEW_EVENT_O        (new_event),
+        .ERR_CTL_IN_RESET   (mouse_err_2),
+        .state_dbg          (ps2_status_dbg)
+    );
+    
+    status_leds #(
+        .HANDLE_CLEAR_INTERNALLY (1),
+        .CLEAR_PERIOD            (32'd10_000_000 - 1)
+    ) led_inst (
+        .clk     (pxl_clk),
+        .reset   (pxl_reset),
+        .status  (ps2_status_dbg),
+        .clear   (),
+        .led     (led)
     );
     
     ps2_to_axis ps2_to_axis_inst (
         .clk                    (clk),
         .reset                  (reset),
         .pxl_clk                (pxl_clk),
-        .pxl_clk_reset          (pxl_clk_reset),
+        .pxl_clk_aresetn        (pxl_clk_aresetn),
         .mouse_x_pos            (mouse_x_pos),
         .mouse_y_pos            (mouse_y_pos),
         .mouse_err              (mouse_err),

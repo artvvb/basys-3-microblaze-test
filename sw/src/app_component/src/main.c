@@ -5,6 +5,11 @@
 #include "xil_io.h"
 #include "xadc.h"
 
+/* Base address for register file */
+#define TOP_BASEADDR		XPAR_TOP_V_0_BASEADDR
+#define XADC_ADDR 		XPAR_XADC_WIZ_0_BASEADDR
+
+/* Axi register offsets for test hardware */
 #define STATUS_ADDR			0	/* READ-ONLY */
 #define XADC_SET_CHAN_ADDR	4	/* WRITE-ONLY */
 #define XADC_DATA_ADDR		8	/* CLEAR-ON-READ */
@@ -13,7 +18,8 @@
 #define PS2_POS_ADDR		20	/* READ-ONLY */
 #define BRAM_SEED_ADDR		24	/* WRITE-ONLY */
 #define BRAM_STATUS_ADDR	28	/* READ-ONLY */
-#define TOP_BASEADDR		XPAR_TOP_V_0_BASEADDR
+
+/* Status register bit fields */
 #define STATUS_ADDR_BRAM_STATUS_TVALID_MASK 	0x80
 #define STATUS_ADDR_BRAM_START_TREADY_MASK 		0x40
 #define STATUS_ADDR_BRAM_SEED_TREADY_MASK 		0x20
@@ -23,8 +29,7 @@
 #define STATUS_ADDR_XADC_TVALID_MASK 			0x2
 #define STATUS_ADDR_XADC_SET_ADDR_TREADY_MASK 	0x1
 
-#define XADC_ADDR 		XPAR_XADC_WIZ_0_BASEADDR
-
+/* DIO controller defines */
 typedef enum {
 	DIO_MODE_OFF = 0,
 	DIO_MODE_IMMUNITY_TOP_TO_BOTTOM=1,
@@ -169,13 +174,12 @@ int main () {
 
 	xil_printf("Hello World!\r\n");
 
-
 	BramTest(0xdeadbeef);
 
 	XadcInitialize(XADC_ADDR);
 	XadcPrint();
 
-	DioStartTest(DIO_MODE_IMMUNITY_PORT_PAIRS, DIO_COUNTERS_1_MHZ);
+	DioStartTest(DIO_MODE_IMMUNITY_PORT_PAIRS, DIO_COUNTERS_12_5_MHZ);
 
 	if (SpiInitialize(&device, XPAR_AXI_QUAD_SPI_0_BASEADDR) != XST_SUCCESS) {
 		xil_printf("Error: Spi failed to initialize.\r\n");
@@ -193,17 +197,17 @@ int main () {
 
 	xil_printf("Spi device id: %06x\r\n", device_id);
 
-	SpiFlashQuadEnable(&device);
-
 	if (ValidateAgainstLfsr(&device, 0xdeadbeef, &error_count) != XST_SUCCESS) {
 		xil_printf("Error: Flash validation failed: %d errors\r\n", error_count);
 	} else {
 		xil_printf("Flash successfully verified\r\n");
 	}
 
-	Ps2Read();
-
 	DioCheckTest();
+
+	while (1) {
+		Ps2Read();
+	}
 }
 
 void receive(XUartLite *uartptr, uint8_t *buffer, uint8_t bytes_remaining) {
@@ -228,14 +232,14 @@ void echo(XUartLite *uartptr, uint8_t *buffer, const uint8_t bytes) {
 	uint8_t *sendbuf = buffer, bytes_sent = 0;
 	uint8_t *recvbuf = buffer, bytes_received = 0;
 	
-	while (bytes_received < bytes) {
-		bytes_received += XUartLite_Recv(uartptr, recvbuf + bytes_received, bytes - bytes_received);
-		if (bytes_received > bytes_sent) {
-			bytes_sent += XUartLite_Send(uartptr, sendbuf + bytes_sent, bytes_received - bytes_sent);
+	while (recvbuf < buffer + bytes) {
+		recvbuf += XUartLite_Recv(uartptr, recvbuf, buffer + bytes - recvbuf);
+		if (recvbuf > sendbuf) {
+			sendbuf += XUartLite_Send(uartptr, sendbuf, recvbuf - sendbuf);
 		}
 	}
-	while (bytes_sent < bytes) {
-		bytes_sent += XUartLite_Send(uartptr, sendbuf + bytes_sent, bytes_received - bytes_sent);
+	while (sendbuf < buffer + bytes) {
+		sendbuf += XUartLite_Send(uartptr, sendbuf, recvbuf - sendbuf);
 	}
 }
 

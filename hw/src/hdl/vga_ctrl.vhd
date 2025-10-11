@@ -49,7 +49,9 @@ entity vga_ctrl is
            MOUSE_X_POS_O : out STD_LOGIC_VECTOR(11 downto 0);
            MOUSE_Y_POS_O : out STD_LOGIC_VECTOR(11 downto 0);
            NEW_EVENT_O : out STD_LOGIC;
-           MOUSE_ERR_O : out STD_LOGIC
+           MOUSE_ERR_O : out STD_LOGIC;
+           ERR_CTL_IN_RESET : out STD_LOGIC;
+      state_dbg : out std_logic_vector(15 downto 0)
            );
 end vga_ctrl;
 
@@ -79,7 +81,9 @@ architecture Behavioral of vga_ctrl is
       middle : OUT std_logic;
       right : OUT std_logic;
       err_mouse_not_present : OUT std_logic;
-      new_event : OUT std_logic
+      new_event : OUT std_logic;
+      err_in_reset : out STD_LOGIC;
+      state_dbg : out std_logic_vector(15 downto 0)
       );
   END COMPONENT;
 
@@ -255,7 +259,9 @@ begin
           setmax_x       => '0',
           setmax_y       => '0',
           ps2_clk        => PS2_CLK,
-          ps2_data       => PS2_DATA
+          ps2_data       => PS2_DATA,
+          err_in_reset   => ERR_CTL_IN_RESET,
+          state_dbg      => state_dbg
        );
        
        ---------------------------------------------------------------

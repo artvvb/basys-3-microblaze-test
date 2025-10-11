@@ -180,7 +180,7 @@ entity MouseCtl is
 generic
 (
    SYSCLK_FREQUENCY_HZ : integer := 100000000;
-   CHECK_PERIOD_MS     : integer := 100; -- Period in miliseconds to check if the mouse is present
+   CHECK_PERIOD_MS     : integer := 500; -- Period in miliseconds to check if the mouse is present
    TIMEOUT_PERIOD_MS   : integer := 100 -- Timeout period in miliseconds when the mouse presence is checked
 );
 port(
@@ -201,8 +201,10 @@ port(
    setmax_y              : in std_logic;
    
    ps2_clk               : inout std_logic;
-   ps2_data              : inout std_logic
+   ps2_data              : inout std_logic;
+   err_in_reset          : out std_logic;
    
+   state_dbg : out std_logic_vector(15 downto 0)
 );
 end MouseCtl;
 
@@ -366,7 +368,27 @@ signal timeout_cnt        : integer range 0 to (TIMEOUT_PERIOD_CLOCKS - 1) := 0;
 signal reset_timeout_cnt  : STD_LOGIC := '0';
 signal timeout            : STD_LOGIC := '0';
 
+signal new_event_flag : STD_LOGIC := '0';
 begin
+
+new_event <= new_event_flag;
+
+state_dbg(0) <= '1' when state = reset or state = reset_wait_ack or state = reset_wait_bat_completion or state = reset_wait_id else '0';
+state_dbg(1) <= new_event_flag;
+state_dbg(2) <= '1' when state = reset_set_sample_rate_200 or state = reset_set_sample_rate_200_wait_ack or state = reset_send_sample_rate_200 or state = reset_send_sample_rate_200_wait_ack else '0';
+state_dbg(3) <= '1' when state = reset_set_sample_rate_100 or state = reset_set_sample_rate_100_wait_ack or state = reset_send_sample_rate_100 or state = reset_send_sample_rate_100_wait_ack else '0';
+state_dbg(4) <= '1' when state = reset_set_sample_rate_80 or state = reset_set_sample_rate_80_wait_ack or state = reset_send_sample_rate_80 or state = reset_send_sample_rate_80_wait_ack else '0';
+state_dbg(5) <= '1' when state = reset_read_id or state = reset_read_id_wait_ack or state = reset_read_id_wait_id else '0';
+state_dbg(6) <= '1' when state = reset_set_resolution or state = reset_set_resolution_wait_ack or state = reset_send_resolution or state = reset_send_resolution_wait_ack else '0';
+state_dbg(7) <= '1' when state = reset_set_sample_rate_40 or state = reset_set_sample_rate_40_wait_ack or state = reset_send_sample_rate_40 or state = reset_send_sample_rate_40_wait_ack else '0';
+state_dbg(8) <= '1' when state = reset_enable_reporting or state = reset_enable_reporting_wait_ack else '0';
+state_dbg(9) <= '1' when state = read_byte_1 else '0';
+state_dbg(10) <= '1' when state = read_byte_2 else '0';
+state_dbg(11) <= '1' when state = read_byte_3 else '0';
+state_dbg(12) <= '1' when state = read_byte_4 else '0';
+state_dbg(13) <= '1' when state = check_read_id or state = check_read_id_wait_ack or state = check_read_id_wait_id else '0';
+state_dbg(14) <= '1' when state = mark_new_event else '0';
+state_dbg(15) <= '1' when state = mark_timeout_err else '0';
 
    Inst_Ps2Interface: Ps2Interface
    PORT MAP
@@ -429,6 +451,9 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
    -- ypos output is the vertical position of the mouse
    -- it has the range: 0-y_max
    ypos <= y_pos(11 downto 0) when rising_edge(clk);
+   
+    err_in_reset <= '1' when state = reset else '0';
+
 
    -- sets the value of x_pos from another module when setx is active
    -- else, computes the new x_pos from the old position when new x
@@ -604,7 +629,7 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
          y_inc <= (others => '0');
          x_new <= '0';
          y_new <= '0';
-         new_event <= '0';
+         new_event_flag <= '0';
          left_down <= '0';
          middle_down <= '0';
          right_down <= '0';
@@ -656,7 +681,7 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
                reset_timeout_cnt <= '1';               
                state <= reset_wait_ack;
                err_mouse_not_present <= '0';
-               new_event <= '0';
+               new_event_flag <= '0';
 
             -- wait ack for the reset command.
             -- when received transition to reset_wait_bat_completion.
@@ -1006,7 +1031,7 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
                -- Start periodic check counter
                reset_periodic_check_cnt <= '0';
                -- reset new_event when back in idle state.
-               new_event <= '0';
+               new_event_flag <= '0';
                -- reset last z delta movement
                zpos <= (others => '0');
                if(read_data = '1') then
@@ -1142,7 +1167,7 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
                   if(rx_data = "000000000") or (rx_data = "00000011") then
                      -- The mouse is present, so reset the timeout counter
                      reset_timeout_cnt <= '1';
-                     state <= read_byte_1;
+                     state <= mark_new_event;
                   else
                      state <= mark_timeout_err;
                   end if;
@@ -1157,14 +1182,15 @@ timeout  <= '1' when timeout_cnt = (TIMEOUT_PERIOD_CLOCKS - 1) else '0';
             -- it will be reset in next state
             -- informs client of a new event which could include the error flag
             when mark_timeout_err =>
-               new_event <= '1';
+               new_event_flag <= '1';
                err_mouse_not_present <= '1';
                state <= reset;
             -- set new_event high
             -- it will be reset in next state
             -- informs client new packet received and processed
             when mark_new_event =>
-               new_event <= '1';
+               new_event_flag <= '1';
+               err_mouse_not_present <= '0';
                state <= read_byte_1;
 
             -- if invalid transition occurred, reset

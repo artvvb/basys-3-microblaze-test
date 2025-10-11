@@ -25,7 +25,7 @@ module ps2_to_axis (
     input logic reset,
     
     input logic        pxl_clk,
-    input logic        pxl_clk_reset,
+    input logic        pxl_clk_aresetn,
     
     input logic [11:0] mouse_x_pos,
     input logic [11:0] mouse_y_pos,
@@ -51,7 +51,7 @@ module ps2_to_axis (
     logic        sys_tready;
     
     always_ff @(posedge pxl_clk) begin
-        if (pxl_clk_reset) begin
+        if (!pxl_clk_aresetn) begin
             pxl_tdata <= 'b0;
             pxl_tvalid <= 'b0;
         end else if (new_event) begin
@@ -63,7 +63,7 @@ module ps2_to_axis (
     end
     
     axis_clock_converter_0 your_instance_name (
-        .s_axis_aresetn (!pxl_clk_reset), // input wire s_axis_aresetn
+        .s_axis_aresetn (pxl_clk_aresetn), // input wire s_axis_aresetn
         .m_axis_aresetn (!reset),         // input wire m_axis_aresetn
         .s_axis_aclk    (pxl_clk),        // input wire s_axis_aclk
         .s_axis_tvalid  (pxl_tvalid),     // input wire s_axis_tvalid
@@ -77,13 +77,13 @@ module ps2_to_axis (
     
     always_comb sys_tready = 1;
     
-    logic not_connected = 1; // indicates whether any valid sample has been received, showing that there is a mouse present to bring the PS/2 controller out of reset
+    logic initializing = 1; // indicates whether any valid sample has been received, showing that there is a mouse present to bring the PS/2 controller out of reset
     logic new_data = 1;
     always_ff @(posedge clk) begin
         if (reset) begin
-            not_connected <= 1;
+            initializing <= 1;
         end else if (sys_tvalid) begin
-            not_connected <= 0;
+            initializing <= 0;
         end
     end
     
@@ -106,5 +106,5 @@ module ps2_to_axis (
     end
     
     always_comb ps2_pos_tvalid = 1;
-    always_comb ps2_pos_tdata[31:25] = {5'b0, new_data, not_connected};
+    always_comb ps2_pos_tdata[31:25] = {5'b0, new_data, initializing};
 endmodule
