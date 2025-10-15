@@ -79,11 +79,31 @@ module seven_seg #(
         anode = 4'hf;
         anode[digit_count] = 1'b0;
     end
+    logic [3:0] carry;
+    always_comb begin
+        carry[0] = (data_count[0+:4] == 4'h9);
+        carry[1] = (data_count[4+:4] == 4'h9) && carry[0];
+        carry[2] = (data_count[8+:4] == 4'h9) && carry[1];
+        carry[3] = (data_count[12+:4] == 4'h9) && carry[2];
+    end
     always_ff @(posedge clk) begin
+        integer i;
         if (reset) begin
             data_count <= 'b0;
         end else if (khz_count_carry && digit_count_carry && ten_hz_count_carry) begin
-            data_count <= data_count + 1;
+            for (i = 0; i < 4; i = i + 1) begin
+                if (i == 0) begin
+                    if (carry[i])
+                        data_count[i*4+:4] <= 0;
+                    else
+                        data_count[i*4+:4] <= data_count[i*4+:4] + 1;
+                end else if (carry[i-1]) begin
+                    if (carry[i])
+                        data_count[i*4+:4] <= 0;
+                    else
+                        data_count[i*4+:4] <= data_count[i*4+:4] + 1;
+                end
+            end
         end
     end
     logic [3:0] current_digit;

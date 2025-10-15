@@ -8,3 +8,7 @@
 !sw/**
 !hw/
 !hw/**
+!host/
+!host/**
+!scripts/
+!scripts/**

@@ -12,18 +12,14 @@ module dio_test (
     input  logic [31:0] dio_settings_tdata,
     input  logic        dio_settings_tvalid,
     output logic        dio_settings_tready,
-        
+    
     output logic [31:0] dio_counter_status_tdata,
     output logic        dio_counter_status_tvalid,
     input  logic        dio_counter_status_tready
 );
     typedef enum integer {
         DIO_MODE_IMMUNITY_TOP_TO_BOTTOM, // output on 1-4 of each, input on 7-10 of each
-            // NOT COMPLETE
-        
         DIO_MODE_IMMUNITY_PORT_PAIRS, // JA->JXADC, JB->JC
-            // NOT TESTED IN HW; SIM SUCCESSFUL
-        
         DIO_MODE_EMISSIONS,
         MODE_OFF
     } DIO_MODE;
