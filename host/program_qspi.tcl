@@ -20,7 +20,7 @@ refresh_hw_device ${hw_device}
 
 puts "INFO: Detected ${fpga_part} board and added ${qspi_part} config memory"
 
-set_property PROGRAM.ADDRESS_RANGE {entire_device} [get_property PROGRAM.HW_CFGMEM ${hw_device}]
+set_property PROGRAM.ADDRESS_RANGE {use_file} [get_property PROGRAM.HW_CFGMEM ${hw_device}]
 set_property PROGRAM.FILES [list $binfile] [get_property PROGRAM.HW_CFGMEM ${hw_device}]
 set_property PROGRAM.PRM_FILE {} [get_property PROGRAM.HW_CFGMEM ${hw_device}]
 set_property PROGRAM.UNUSED_PIN_TERMINATION {pull-none} [get_property PROGRAM.HW_CFGMEM ${hw_device}]

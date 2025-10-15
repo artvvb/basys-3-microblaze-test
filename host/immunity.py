@@ -6,6 +6,12 @@ import os
 import subprocess
 import numpy as np
 import logging
+from datetime import datetime, timedelta
+import time
+
+def lfsr_next(lfsr):
+    pickbit = lambda x, i: (x >> i) & 0x1
+    return ((lfsr << 1) | (pickbit(lfsr, 31) ^ pickbit(lfsr, 21) ^ pickbit(lfsr, 1) ^ pickbit(lfsr, 0))) & 0xffffffff
 
 def init_logging():
     logging.basicConfig(level=logging.INFO)
@@ -21,15 +27,14 @@ def init_logging():
     logger.addHandler(console_handler)
 
 def generate_qspi_simfile(seed):
-    size = 1024 * 1024 # 32 Mebi-bit flash part
+    size = 1024 * 128 # reading a single page burst per loop keeps the read time below a second; 1024*1024 = 32 Mebi-bit flash part
     lfsr = seed
-    pickbit = lambda x, i: (x >> i) & 0x1
     binfile_name = os.path.join(os.path.dirname(__file__), "random_data.bin")
-    logging.info(f"Writing {binfile_name} with random data (seed={hex(seed)})")
-    with open(binfile_name, "w") as binfile:
+    logging.info(f"Writing {binfile_name} with random data (seed={hex(seed)}, expected first word {hex(lfsr_next(seed))})")
+    with open(binfile_name, "wb") as binfile:
         for _ in range(size):
-            lfsr = ((lfsr << 1) | (pickbit(lfsr, 31) ^ pickbit(lfsr, 21) ^ pickbit(lfsr, 1) ^ pickbit(lfsr, 0))) & 0xffffffff
-            binfile.write(hex(lfsr)[2:].zfill(8))
+            lfsr = lfsr_next(lfsr)
+            binfile.write(np.uint32.tobytes(lfsr))
 
 def write_qspi_binfile(seed):
     generate_qspi_simfile(seed)
@@ -98,10 +103,12 @@ def FlashRead(port, seed):
     sendint(port, seed, 8)
     read_passes = int(port.read(1), 16) # '0' is a pass
     error_count = int(port.read(8), 16)
+    first = int(port.read(8), 16)
+    last  = int(port.read(8), 16)
     if read_passes != 0:
-        logging.error(f"Flash read failed: Contents did not match expectation, error_count={error_count}")
+        logging.error(f"Flash read failed: Contents did not match expectation, error_count={error_count}, first={hex(first).zfill(8)}, last={hex(last).zfill(8)}")
     else:
-        logging.info(f"Flash read passed")
+        logging.info(f"Flash read passed, first value seen: {hex(first).zfill(8)}, last: {hex(last).zfill(8)}")
 
 DIO_SETTINGS_ADDR = 12
 DIO_STATUS_ADDR = 16
@@ -133,9 +140,9 @@ def CheckDio(port):
         logging.error(f"Invalid DIO phase/divider configuration - check setup")
     
     if (status & 0xffff) != 0:
-        logging.error(f"Ivalid DIO bits detected ({hex(status & 0xffff)}) since the last read")
+        logging.error(f"Invalid DIO bits detected ({hex(status & 0xffff)}) since the last read")
     else:
-        logging.info(f"No DIO errors detected")
+        logging.info(f"All DIO samples match")
 
 def StartDio(port, mode, phase, divider):
     settings = ((mode & 0x3) << 16) | ((phase & 0xff) << 8) | ((divider & 0xff))
@@ -168,7 +175,6 @@ def CheckMouse(port):
 
 def CheckBram(port):
     seed = np.random.randint(0, 2**32, dtype=np.uint32)
-    np.random.randint
     
     sendchr(port, 'w')
     sendint(port, BRAM_SEED_ADDR, 2)
@@ -177,8 +183,6 @@ def CheckBram(port):
     sendchr(port, 'r')
     sendint(port, BRAM_STATUS_ADDR, 2)
     status = int(port.read(8), 16)
-
-    print(f"BRAM status: {hex(status)[2:]}")
     
     if testbit(status, 1):
         if testbit(status, 0):
@@ -195,25 +199,29 @@ if __name__ == "__main__":
     logging.info("Starting IMMUNITY test sequence")
 
     qspi_seed = np.random.randint(0, 2**32, dtype=np.uint32)
-    logging.info(f"Writing QSPI with seed {qspi_seed}")
+    logging.info(f"Writing QSPI")
     write_qspi_binfile(qspi_seed)
     logging.info(f"Writing FPGA image")
     program_device()
+
+    program_only = False
+    if program_only: exit()
 
     logging.info(f"Connecting to board on port {sys.argv[1]}")
     with ser.Serial(port=sys.argv[1], baudrate=115200) as port:
     # with ser.Serial(port=sys.argv[1], baudrate=115200, timeout=0.1) as port:
         # Start DIO test
-        divider = 15
+        divider = 3 # tested 15, 7, 4
         phase = ((divider + 1) // 2) - 1
         
         mode = DIO_MODE_IMMUNITY_PORT_PAIRS
         StartDio(port, mode=mode, phase=phase, divider=divider)
-        logging.info(f"DIO counter output frequency is set to {100_000_000 / (2 * (divider + 1))}")
+        logging.info(f"DIO counter output frequency is set to {100_000_000 / (2 * (divider + 1))} MHz")
         logging.info(f"DIO readback phase count is set to {phase} / {divider}")
         
         done = False
         while not done:
+            targettime = datetime.now() + timedelta(seconds=1)
             # Read XADC
             ReadXadc(port)
             # Do a Read ID
@@ -229,5 +237,10 @@ if __name__ == "__main__":
             # Run BRAM memory test
             CheckBram(port)
 
-            # res = input('(q)uit?',)
-            # if len(res) >= 1 and res[0] == 'q': done = True
+            timeleft = (targettime - datetime.now()).total_seconds()
+            if timeleft > 0: time.sleep(timeleft)
+
+# Add UI or at least static view of most recent log pass; include com port and stop button
+# Add controls to turn off each of the steps above
+# Double check flash programming
+# Add switch to flip into emissions mode
