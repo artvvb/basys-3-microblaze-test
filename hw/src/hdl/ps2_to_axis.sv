@@ -38,7 +38,7 @@ module ps2_to_axis (
     //      mouse_error,    // indicates read_id failure in communication with the mouse, indicating a potential disconnect
     //      mouse_x_pos,    // current mouse X coordinate
     //      mouse_y_pos     // current mouse Y coordinate
-    // } 
+    // }
     output logic        ps2_pos_tvalid,
     input  logic        ps2_pos_tready
 );

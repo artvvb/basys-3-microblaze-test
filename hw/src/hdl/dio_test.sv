@@ -121,15 +121,28 @@ module dio_test (
     // Set I/O signal directions per mode
     always_ff @(posedge clk) begin
         if (mode == DIO_MODE_IMMUNITY_TOP_TO_BOTTOM) begin
-            // note: top row outputs are suppressed by tristate buffer
-            ja_o <= dout_count;
-            ja_t <= 8'hf0;
-            jxadc_o <= dout_count;
-            jxadc_t <= 8'hf0;
-            jb_o <= dout_count;
-            jb_t <= 8'hf0;
-            jc_o <= dout_count;
-            jc_t <= 8'hf0;
+            ja_o[6] <= dout_count[3];
+            ja_o[4] <= dout_count[2];
+            ja_o[3] <= dout_count[1];
+            ja_o[1] <= dout_count[0];
+            ja_t <= 8'ha5;
+            // jxadc_o <= dout_count;
+            jxadc_o[6] <= dout_count[3];
+            jxadc_o[4] <= dout_count[2];
+            jxadc_o[3] <= dout_count[1];
+            jxadc_o[1] <= dout_count[0];
+            jxadc_t <= 8'ha5;
+            // jb_o <= dout_count;
+            jb_o[6] <= dout_count[3];
+            jb_o[4] <= dout_count[2];
+            jb_o[3] <= dout_count[1];
+            jb_o[1] <= dout_count[0];
+            jb_t <= 8'ha5;
+            jc_o[6] <= dout_count[3];
+            jc_o[4] <= dout_count[2];
+            jc_o[3] <= dout_count[1];
+            jc_o[1] <= dout_count[0];
+            jc_t <= 8'ha5;
             dout_loop_net <= {4{dout_count[3:0]}};
         end else if (mode == DIO_MODE_IMMUNITY_PORT_PAIRS) begin
             ja_o <= dout_count;
@@ -292,7 +305,27 @@ module dio_test (
             din_reg[1] <= 'b0;
         end else if (dio_sample_input) begin
             if (mode == DIO_MODE_IMMUNITY_TOP_TO_BOTTOM) begin
-                din_reg[0] <= {jxadc_sync_flops[1][7:4], ja_sync_flops[1][7:4], jb_sync_flops[1][7:4], jc_sync_flops[1][7:4]};
+                // T <= 8'ha5
+                din_reg[0] <= {
+                    jxadc_sync_flops[1][7], 
+                    jxadc_sync_flops[1][5], 
+                    jxadc_sync_flops[1][2], 
+                    jxadc_sync_flops[1][0], 
+                    ja_sync_flops[1][7],
+                    ja_sync_flops[1][5],
+                    ja_sync_flops[1][2],
+                    ja_sync_flops[1][0],
+                    jb_sync_flops[1][7],
+                    jb_sync_flops[1][5],
+                    jb_sync_flops[1][2],
+                    jb_sync_flops[1][0],
+                    jc_sync_flops[1][7],
+                    jc_sync_flops[1][5],
+                    jc_sync_flops[1][2],
+                    jc_sync_flops[1][0]
+                };
+                // T <= 8'hf0
+                // din_reg[0] <= {jxadc_sync_flops[1][7:4], ja_sync_flops[1][7:4], jb_sync_flops[1][7:4], jc_sync_flops[1][7:4]};
             end else if (mode == DIO_MODE_IMMUNITY_PORT_PAIRS) begin
                 din_reg[0] <= {jxadc_sync_flops[1], jc_sync_flops[1]};
             end
