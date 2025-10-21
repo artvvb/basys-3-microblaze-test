@@ -236,9 +236,9 @@ uint32_t LfsrNext(uint32_t lfsr)
 	return ((lfsr << 1) | (pickbit(lfsr, 31) ^ pickbit(lfsr, 21) ^ pickbit(lfsr, 1) ^ pickbit(lfsr, 0)));
 }
 
-int ValidateAgainstLfsr(XSpi *SpiPtr, const uint32_t seed, uint32_t *error_count)
+int ValidateAgainstLfsr(XSpi *SpiPtr, const uint32_t seed, uint32_t *error_count, uint32_t *first_value_read, uint32_t *last_value_read)
 {
-	const uint32_t flash_size = 1024*1024;
+	const uint32_t flash_size = 128*1024; // A full flash read, 1024*1024 bytes, takes ~5 seconds;
 	const uint32_t row_size = 128;
 	uint32_t lfsr = seed;
 	*error_count = 0;
@@ -255,13 +255,18 @@ int ValidateAgainstLfsr(XSpi *SpiPtr, const uint32_t seed, uint32_t *error_count
 		}
 		
 		for (uint32_t i=0; i < row_size / sizeof(uint32_t); i++) {
+			// reverse((uint8_t*)dataptr);
+
+			if (lfsr == seed) *first_value_read = *dataptr;
+			
 			lfsr = LfsrNext(lfsr);
 			
-			reverse((uint8_t*)dataptr);
             uint32_t position = addr + i * sizeof(uint32_t);
             
+			*last_value_read = *dataptr;
+
 			if (*dataptr != lfsr) {
-				*error_count++;
+				(*error_count)++;
 			}
 			dataptr++;
 		}

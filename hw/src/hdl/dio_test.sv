@@ -15,7 +15,9 @@ module dio_test (
     
     output logic [31:0] dio_counter_status_tdata,
     output logic        dio_counter_status_tvalid,
-    input  logic        dio_counter_status_tready
+    input  logic        dio_counter_status_tready,
+    
+    output logic [3:0]  dio_error
 );
     typedef enum integer {
         DIO_MODE_IMMUNITY_TOP_TO_BOTTOM, // output on 1-4 of each, input on 7-10 of each
@@ -121,27 +123,27 @@ module dio_test (
     // Set I/O signal directions per mode
     always_ff @(posedge clk) begin
         if (mode == DIO_MODE_IMMUNITY_TOP_TO_BOTTOM) begin
-            ja_o[6] <= dout_count[3];
-            ja_o[4] <= dout_count[2];
-            ja_o[3] <= dout_count[1];
-            ja_o[1] <= dout_count[0];
+            ja_o[3] <= dout_count[3];
+            ja_o[6] <= dout_count[2];
+            ja_o[1] <= dout_count[1];
+            ja_o[4] <= dout_count[0];
             ja_t <= 8'ha5;
             // jxadc_o <= dout_count;
-            jxadc_o[6] <= dout_count[3];
-            jxadc_o[4] <= dout_count[2];
-            jxadc_o[3] <= dout_count[1];
-            jxadc_o[1] <= dout_count[0];
+            jxadc_o[3] <= dout_count[3];
+            jxadc_o[6] <= dout_count[2];
+            jxadc_o[1] <= dout_count[1];
+            jxadc_o[4] <= dout_count[0];
             jxadc_t <= 8'ha5;
             // jb_o <= dout_count;
-            jb_o[6] <= dout_count[3];
-            jb_o[4] <= dout_count[2];
-            jb_o[3] <= dout_count[1];
-            jb_o[1] <= dout_count[0];
+            jb_o[3] <= dout_count[3];
+            jb_o[6] <= dout_count[2];
+            jb_o[1] <= dout_count[1];
+            jb_o[4] <= dout_count[0];
             jb_t <= 8'ha5;
-            jc_o[6] <= dout_count[3];
-            jc_o[4] <= dout_count[2];
-            jc_o[3] <= dout_count[1];
-            jc_o[1] <= dout_count[0];
+            jc_o[3] <= dout_count[3];
+            jc_o[6] <= dout_count[2];
+            jc_o[1] <= dout_count[1];
+            jc_o[4] <= dout_count[0];
             jc_t <= 8'ha5;
             dout_loop_net <= {4{dout_count[3:0]}};
         end else if (mode == DIO_MODE_IMMUNITY_PORT_PAIRS) begin
@@ -192,7 +194,7 @@ module dio_test (
 //            assign jc[i] = (jc_t[i]) ? (1'bz) : (jc_o[i]);
 //            assign jxadc[i] = (jxadc_t[i]) ? (1'bz) : (jxadc_o[i]);
            IOBUF #(
-              .DRIVE(12), // Specify the output drive strength
+              .DRIVE(4), // Specify the output drive strength
               .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
               .IOSTANDARD("DEFAULT"), // Specify the I/O standard
               .SLEW("SLOW") // Specify the output slew rate
@@ -203,7 +205,7 @@ module dio_test (
               .T(ja_t[i])      // 3-state enable input, high=input, low=output
            );
            IOBUF #(
-              .DRIVE(12), // Specify the output drive strength
+              .DRIVE(4), // Specify the output drive strength
               .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
               .IOSTANDARD("DEFAULT"), // Specify the I/O standard
               .SLEW("SLOW") // Specify the output slew rate
@@ -214,7 +216,7 @@ module dio_test (
               .T(jb_t[i])      // 3-state enable input, high=input, low=output
            );
            IOBUF #(
-              .DRIVE(12), // Specify the output drive strength
+              .DRIVE(4), // Specify the output drive strength
               .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
               .IOSTANDARD("DEFAULT"), // Specify the I/O standard
               .SLEW("SLOW") // Specify the output slew rate
@@ -225,7 +227,7 @@ module dio_test (
               .T(jc_t[i])      // 3-state enable input, high=input, low=output
            );
            IOBUF #(
-              .DRIVE(12), // Specify the output drive strength
+              .DRIVE(4), // Specify the output drive strength
               .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
               .IOSTANDARD("DEFAULT"), // Specify the I/O standard
               .SLEW("SLOW") // Specify the output slew rate
@@ -308,20 +310,20 @@ module dio_test (
                 // T <= 8'ha5
                 din_reg[0] <= {
                     jxadc_sync_flops[1][7], 
-                    jxadc_sync_flops[1][5], 
                     jxadc_sync_flops[1][2], 
+                    jxadc_sync_flops[1][5], 
                     jxadc_sync_flops[1][0], 
                     ja_sync_flops[1][7],
-                    ja_sync_flops[1][5],
                     ja_sync_flops[1][2],
+                    ja_sync_flops[1][5],
                     ja_sync_flops[1][0],
                     jb_sync_flops[1][7],
-                    jb_sync_flops[1][5],
                     jb_sync_flops[1][2],
+                    jb_sync_flops[1][5],
                     jb_sync_flops[1][0],
                     jc_sync_flops[1][7],
-                    jc_sync_flops[1][5],
                     jc_sync_flops[1][2],
+                    jc_sync_flops[1][5],
                     jc_sync_flops[1][0]
                 };
                 // T <= 8'hf0
@@ -363,4 +365,10 @@ module dio_test (
     always_comb dio_counter_status_tdata[17] = update_output_phase >= clock_div_max; // all 0 counts as success - phase must be less than divisor
     always_comb dio_counter_status_tdata[16] = !running; // all 0 counts as success - not running is bad
     always_comb dio_counter_status_tvalid = 1;
+    always_comb dio_error = {
+        |dio_counter_status_tdata[15:12],
+        |dio_counter_status_tdata[11:8],
+        |dio_counter_status_tdata[7:4],
+        |dio_counter_status_tdata[3:0]
+    };
 endmodule

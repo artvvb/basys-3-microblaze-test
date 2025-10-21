@@ -40,7 +40,8 @@ module ps2_to_axis (
     //      mouse_y_pos     // current mouse Y coordinate
     // }
     output logic        ps2_pos_tvalid,
-    input  logic        ps2_pos_tready
+    input  logic        ps2_pos_tready,
+    output logic        mouse_disconnect
 );
     logic [31:0] pxl_tdata;
     logic        pxl_tvalid;
@@ -107,4 +108,6 @@ module ps2_to_axis (
     
     always_comb ps2_pos_tvalid = 1;
     always_comb ps2_pos_tdata[31:25] = {5'b0, new_data, initializing};
+    
+    always_comb mouse_disconnect = (!initializing && ps2_pos_tdata[24]);
 endmodule

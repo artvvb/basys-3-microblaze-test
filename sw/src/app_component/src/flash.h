@@ -19,6 +19,9 @@ uint32_t pickbit(uint32_t v, uint8_t bit);
 void reverse(uint8_t buf[4]);
 uint32_t LfsrNext(uint32_t lfsr);
 
-int ValidateAgainstLfsr(XSpi *SpiPtr, const uint32_t seed, uint32_t *error_count);
+int ValidateAgainstLfsr(XSpi *SpiPtr, const uint32_t seed, uint32_t *error_count, uint32_t *first_value_read, uint32_t *last_value_read);
+
+void SpiHandler(void *CallBackRef, u32 StatusEvent, unsigned int ByteCount);
+static int SetupInterruptSystem(XSpi *SpiPtr);
 
 #endif

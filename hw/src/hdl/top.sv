@@ -29,6 +29,9 @@ module top (
     input  logic [15:0] sw,
     output logic [15:0] led,
     
+    input logic flash_error,
+    input logic uart_error,
+    
     output logic [3:0]  vga_r,
     output logic [3:0]  vga_g,
     output logic [3:0]  vga_b,
@@ -162,14 +165,14 @@ module top (
     always_comb control_rresp = 2'b00; /* OKAY */
     
     /* Interface definitions */
-    localparam [7:0] STATUS_ADDR = 0; // READ-ONLY
-    localparam [7:0] XADC_SET_CHAN_ADDR = 4; // WRITE-ONLY
-    localparam [7:0] XADC_DATA_ADDR = 8; // CLEAR-ON-READ
-    localparam [7:0] DIO_SETTINGS_ADDR = 12; // WRITE-ONLY
-    localparam [7:0] DIO_STATUS_ADDR = 16; // CLEAR-ON-READ
-    localparam [7:0] PS2_POS_ADDR = 20; // READ-ONLY
-    localparam [7:0] BRAM_SEED_ADDR = 24; // WRITE-ONLY
-    localparam [7:0] BRAM_STATUS_ADDR = 28; // READ-ONLY
+    localparam [7:0] STATUS_ADDR = 0;           // READ-ONLY
+    localparam [7:0] XADC_SET_CHAN_ADDR = 4;    // WRITE-ONLY
+    localparam [7:0] XADC_DATA_ADDR = 8;        // CLEAR-ON-READ
+    localparam [7:0] DIO_SETTINGS_ADDR = 12;    // WRITE-ONLY
+    localparam [7:0] DIO_STATUS_ADDR = 16;      // CLEAR-ON-READ
+    localparam [7:0] PS2_POS_ADDR = 20;         // READ-ONLY
+    localparam [7:0] BRAM_SEED_ADDR = 24;       // WRITE-ONLY
+    localparam [7:0] BRAM_STATUS_ADDR = 28;     // READ-ONLY
     
     logic [7:0] xadc_set_addr_tdata;
     logic       xadc_set_addr_tvalid;
@@ -243,6 +246,7 @@ module top (
     always_comb xadc_tvalid = 1;
     always_comb xadc_set_addr_tready = 1;
     
+    logic [3:0] dio_error;
     dio_test dio_inst (
         .clk                             (clk),
         .reset                           (reset),
@@ -255,14 +259,14 @@ module top (
         .dio_settings_tready             (dio_settings_tready),
         .dio_counter_status_tvalid       (dio_status_tvalid),
         .dio_counter_status_tdata        (dio_status_tdata),
-        .dio_counter_status_tready       (dio_status_tready)
+        .dio_counter_status_tready       (dio_status_tready),
+        .dio_error                       (dio_error)
     );
     
     logic [11:0] mouse_x_pos;
     logic [11:0] mouse_y_pos;
     logic mouse_err;
     logic new_event;
-    logic [15:0] ps2_status_dbg;
     
     vga_ctrl vga_inst (
         .CLK_I              (pxl_clk),
@@ -278,16 +282,23 @@ module top (
         .MOUSE_ERR_O        (mouse_err),
         .NEW_EVENT_O        (new_event),
         .ERR_CTL_IN_RESET   (mouse_err_2),
-        .state_dbg          (ps2_status_dbg)
+        .state_dbg          ()
     );
+    
+    
+    logic [14:0] status_leds;
+    logic mouse_disconnect;
+    logic bram_error;
+    
+    always_comb status_leds = {dio_error, 7'b0, uart_error, mouse_disconnect, flash_error, bram_error};
     
     status_leds #(
         .HANDLE_CLEAR_INTERNALLY (1),
-        .CLEAR_PERIOD            (32'd10_000_000 - 1)
+        .CLEAR_PERIOD            (32'd50_000_000 - 1)
     ) led_inst (
-        .clk     (pxl_clk),
-        .reset   (pxl_reset),
-        .status  (ps2_status_dbg),
+        .clk     (clk),
+        .reset   (reset),
+        .status  (status_leds),
         .clear   (),
         .led     (led)
     );
@@ -303,7 +314,8 @@ module top (
         .new_event              (new_event),
         .ps2_pos_tdata          (ps2_pos_tdata), 
         .ps2_pos_tvalid         (ps2_pos_tvalid),
-        .ps2_pos_tready         (ps2_pos_tready)
+        .ps2_pos_tready         (ps2_pos_tready),
+        .mouse_disconnect       (mouse_disconnect)
     );
     
     seven_seg seven_seg_inst (
@@ -321,6 +333,7 @@ module top (
         .seed_tready        (bram_seed_tready),
         .status_tdata       (bram_status_tdata),
         .status_tvalid      (bram_status_tvalid),
-        .status_tready      (bram_status_tready)
+        .status_tready      (bram_status_tready),
+        .error              (bram_error)
     );
 endmodule

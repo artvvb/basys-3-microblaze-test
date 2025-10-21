@@ -29,7 +29,8 @@ module bram_test #(
     input  logic [31:0] seed_tdata,
     output logic [31:0] status_tdata, // "0" + {reset busy, done, test passed}
     output logic        status_tvalid,
-    input  logic        status_tready
+    input  logic        status_tready,
+    output logic        error
 );
     localparam integer ADDR_WIDTH = 10;
     localparam logic [ADDR_WIDTH-1:0] ADDR_MAX = 'h3ff;
@@ -106,10 +107,13 @@ module bram_test #(
     always_ff @(posedge clk) begin
         if (reset) begin
             status_tdata[0] <= 1;
+            error <= 0;
         end else if (state == READ && addr >= ADDR_READ_VALID && wdata != rdata) begin
             status_tdata[0] <= 0;
+            error <= 1;
         end else if (state == WAIT_FOR_SEED) begin
             status_tdata[0] <= 1;
+            error <= 0;
         end
     end
     always_comb status_tdata[1] = (state == WAIT_FOR_STATUS);

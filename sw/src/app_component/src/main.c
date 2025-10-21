@@ -4,6 +4,7 @@
 #include "xuartlite.h"
 #include "xil_io.h"
 #include "xadc.h"
+#include "xgpio.h"
 
 /* Base address for register file */
 #define TOP_BASEADDR		XPAR_TOP_V_0_BASEADDR
@@ -29,6 +30,11 @@
 #define STATUS_ADDR_XADC_TVALID_MASK 			0x2
 #define STATUS_ADDR_XADC_SET_ADDR_TREADY_MASK 	0x1
 
+// /* Interrupt vector table*/
+// ivt_t ivt [] = {
+// 	{}
+// };
+
 /* DIO controller defines */
 typedef enum {
 	DIO_MODE_OFF = 0,
@@ -45,6 +51,23 @@ typedef enum {
 #define DIO_COUNTERS_5_MHZ 		4, 9
 #define DIO_COUNTERS_2_5_MHZ 	9, 19
 #define DIO_COUNTERS_1_MHZ 		24, 49
+
+void ProcessCommands();
+int DioCheckTest();
+int DioStartTest(dio_mode_t mode, uint8_t phase, uint8_t divisor);
+int Ps2Read();
+int BramTest(uint32_t seed);
+void receive(XUartLite *uartptr, uint8_t *buffer, uint8_t bytes_remaining);
+void send(XUartLite *uartptr, uint8_t *buffer, uint8_t bytes_remaining);
+void echo(XUartLite *uartptr, uint8_t *buffer, const uint8_t bytes);
+void hextoint(uint32_t *i, uint8_t *a, uint8_t n);
+void inttohex(uint32_t i, uint8_t *a, uint8_t n);
+int InitializeErrGpio();
+void ToggleFlashErr();
+void ToggleUartErr();
+
+static XGpio flash_err;
+static XGpio uart_err;
 
 int DioCheckTest() {
 	// volatile uint32_t *SettingsPtr = (uint32_t*)(TOP_BASEADDR + DIO_SETTINGS_ADDR);
@@ -115,7 +138,6 @@ int DioStartTest(dio_mode_t mode, uint8_t phase, uint8_t divisor) {
 #define getxpos(raw) 			((raw & MouseXPosMask) >> MouseXPosBit)
 #define getypos(raw) 			((raw & MouseYPosMask))
 
-int Ps2Read();
 int Ps2Read() {
 	volatile uint32_t *Ps2PosPtr = (uint32_t*)(TOP_BASEADDR + PS2_POS_ADDR);
 	volatile uint32_t *StatusPtr = (uint32_t*)(TOP_BASEADDR + STATUS_ADDR);
@@ -168,46 +190,35 @@ int BramTest(uint32_t seed) {
 }
 
 int main () {
-    XSpi device;
-    uint32_t device_id;
-	uint32_t error_count = 0;
+	ProcessCommands();
+}
 
-	xil_printf("Hello World!\r\n");
-
-	BramTest(0xdeadbeef);
-
-	XadcInitialize(XADC_ADDR);
-	XadcPrint();
-
-	DioStartTest(DIO_MODE_IMMUNITY_PORT_PAIRS, DIO_COUNTERS_12_5_MHZ);
-
-	if (SpiInitialize(&device, XPAR_AXI_QUAD_SPI_0_BASEADDR) != XST_SUCCESS) {
-		xil_printf("Error: Spi failed to initialize.\r\n");
+int InitializeErrGpio() {
+	XGpio_Config *cfgptr;
+	
+	cfgptr = XGpio_LookupConfig(XPAR_CONTROL_0_FLASH_ERROR_GPIO_0_BASEADDR);
+	if (XGpio_CfgInitialize(&flash_err, cfgptr, cfgptr->BaseAddress) != XST_SUCCESS) {
+		return XST_FAILURE;
 	}
+	XGpio_DiscreteWrite(&flash_err, 1, 0);
 
-	if (SpiFlashReadId(&device, &device_id) != XST_SUCCESS) {
-		xil_printf("Error: Failed to read device id.\r\n");
+	cfgptr = XGpio_LookupConfig(XPAR_CONTROL_0_UART_ERROR_GPIO_0_BASEADDR);
+	if (XGpio_CfgInitialize(&uart_err, cfgptr, cfgptr->BaseAddress) != XST_SUCCESS) {
+		return XST_FAILURE;
 	}
+	XGpio_DiscreteWrite(&uart_err, 1, 0);
 
-	xil_printf("Spi device id: %06x\r\n", device_id);
+	return XST_SUCCESS;
+}
 
-	if (SpiFlashReadId(&device, &device_id) != XST_SUCCESS) {
-		xil_printf("Error: Failed to read device id.\r\n");
-	}
+void ToggleFlashErr() {
+	XGpio_DiscreteWrite(&flash_err, 1, 1);
+	XGpio_DiscreteWrite(&flash_err, 1, 0);
+}
 
-	xil_printf("Spi device id: %06x\r\n", device_id);
-
-	if (ValidateAgainstLfsr(&device, 0xdeadbeef, &error_count) != XST_SUCCESS) {
-		xil_printf("Error: Flash validation failed: %d errors\r\n", error_count);
-	} else {
-		xil_printf("Flash successfully verified\r\n");
-	}
-
-	DioCheckTest();
-
-	while (1) {
-		Ps2Read();
-	}
+void ToggleUartErr() {
+	XGpio_DiscreteWrite(&uart_err, 1, 1);
+	XGpio_DiscreteWrite(&uart_err, 1, 0);
 }
 
 void receive(XUartLite *uartptr, uint8_t *buffer, uint8_t bytes_remaining) {
@@ -264,7 +275,7 @@ void inttohex(uint32_t i, uint8_t *a, uint8_t n) {
 		if ((i & 0xf) >= 0 && (i & 0xf) <= 9) {
 			a[n] = (i & 0xf) + '0';
 		} else {
-			a[n] = (i & 0xf) + 'a';
+			a[n] = (i & 0xf) - 10 + 'a';
 		}
 		i >>= 4;
 	}
@@ -283,10 +294,24 @@ void ProcessCommands() {
 	if (SpiInitialize(&spi, XPAR_AXI_QUAD_SPI_0_BASEADDR) != XST_SUCCESS) {
 		xil_printf("Error! Spi failed to initialize.\r\n");
 	}
+	if (XadcInitialize(XPAR_XADC_WIZ_0_BASEADDR) != XST_SUCCESS) {
+		xil_printf("Error! XADC failed to initialize.\r\n");	
+	}
+	cfgptr = XUartLite_LookupConfig(XPAR_AXI_UARTLITE_0_BASEADDR);
+	if (!cfgptr) {
+		xil_printf("Error! UART failed to initialize.\r\n");
+	}
+	if (XUartLite_CfgInitialize(&uart, cfgptr, cfgptr->RegBaseAddr) != XST_SUCCESS) {
+		xil_printf("Error! UART failed to initialize.\r\n");
+	}
+	if (InitializeErrGpio() != XST_SUCCESS) {
+		xil_printf("Error! GPIOs failed to initialize\r\n");
+	}
 
 	uint8_t bytecount;
 	uint8_t buffer[256];
-	int32_t addr, data, echo_bytes, error_count, device_id;
+	uint16_t xadc_data[Xadc_NumChannels];
+	int32_t addr, data, echo_bytes, error_count, device_id, first, last;
 	uint8_t pass;
 
 	while (1) {
@@ -315,10 +340,15 @@ void ProcessCommands() {
 			case 'q':
 				receive(&uart, buffer, 8);
 				hextoint(&data, buffer, 8);
-				pass = ValidateAgainstLfsr(&spi, data, &error_count);
+				pass = ValidateAgainstLfsr(&spi, data, &error_count, &first, &last);
+				if (!pass) ToggleFlashErr();
 				inttohex(pass, buffer, 1);
 				send(&uart, buffer, 1);
 				inttohex(error_count, buffer, 8);
+				send(&uart, buffer, 8);
+				inttohex(first, buffer, 8);
+				send(&uart, buffer, 8);
+				inttohex(last, buffer, 8);
 				send(&uart, buffer, 8);
 				break;
 			case 'f':
@@ -326,7 +356,16 @@ void ProcessCommands() {
 				inttohex(device_id, buffer, 6);
 				send(&uart, buffer, 6);
 				break;
-			case 'x': // TODO
+			case 'x':
+				Xadc_ReadData(xadc_data);
+				inttohex(xadc_data[0], &(buffer[0]), 4);
+				inttohex(xadc_data[1], &(buffer[4]), 4);
+				inttohex(xadc_data[2], &(buffer[8]), 4);
+				inttohex(xadc_data[3], &(buffer[12]), 4);
+				send(&uart, buffer, 16);
+				break;
+			default:
+				ToggleUartErr();
 				break;
 		}
 	}
