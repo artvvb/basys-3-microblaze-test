@@ -7,7 +7,7 @@ from time import sleep
 import threading
 import sys
 
-def init_logging(include_console=False):
+def init_logging(include_console=False, text_handler=None):
     logging.basicConfig(level=logging.INFO)
     log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
     logger = logging.getLogger()
@@ -21,15 +21,27 @@ def init_logging(include_console=False):
         console_handler.setFormatter(log_formatter)
         logger.addHandler(console_handler)
 
-init_logging(False)
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger()
+    logger.addHandler(text_handler)
 
-def dummy_cycle_loop(push_to_text_box, update_text_box, done_callback):
+class TextHandler(logging.Handler):
+    def __init__(self, text_widget):
+        super().__init__()
+        self.text_widget = text_widget
+    def emit(self, record):
+        msg = f"{record.levelname}: {self.format(record)}"
+        def append():
+            self.text_widget.configure(state='normal')
+            self.text_widget.insert(END, msg + '\n')
+            self.text_widget.configure(state='disabled')
+            self.text_widget.yview(END)
+        self.text_widget.after(0, append)
+
+def dummy_cycle_loop(done_callback):
     n = 0
     while not done_callback():
         targettime = datetime.now() + timedelta(seconds=1)
-
-        push_to_text_box(f"Cycle {n}", False)
-        update_text_box()
 
         logging.info(f"Cycle {n}")
         n += 1
@@ -37,19 +49,7 @@ def dummy_cycle_loop(push_to_text_box, update_text_box, done_callback):
         if timeleft > 0:
             time.sleep(timeleft)
 
-next_text_box_string = []
-def push_to_text_box(text_box, s, immediate=False):
-    global next_text_box_string
-    next_text_box_string.append(s)
-    if immediate:
-        text_box.delete(1.0, END)
-        text_box.insert(1.0, '\n'.join(next_text_box_string))
-        next_text_box_string = []
-def update_text_box(text_box):
-    global next_text_box_string
-    text_box.delete(1.0, END)
-    text_box.insert(1.0, '\n'.join(next_text_box_string))
-    next_text_box_string = []
+loop_done = False
 
 from test import run_test
 
@@ -66,65 +66,82 @@ if __name__ == '__main__':
         "enable_dio_test":      BooleanVar(root, True),
         "enable_mouse":         BooleanVar(root, True),
         "enable_bram_test":     BooleanVar(root, True),
-        "dio_divider":          IntVar(root, 4),
-        "dio_mode":             IntVar(root, 0),
+        "dio_divider":          IntVar(root, 3),
+        "dio_mode":             IntVar(root, 1),
         "com_port":             sys.argv[1]
     }
 
-    loop_done = False
-    thread = None
-    def start_loop(text_box):
-        global thread, loop_done
-        if not thread is None: return
+    from daemon import daemon_handler
+    from test import test_obj
 
-        logging.info("Starting Test")
-        logging.info(f'Setting enable_xadc:         {settings["enable_xadc"].get()}')
-        logging.info(f'Setting enable_flash_id:     {settings["enable_flash_id"].get()}')
-        logging.info(f'Setting enable_flash_verify: {settings["enable_flash_verify"].get()}')
-        logging.info(f'Setting enable_uart_echo:    {settings["enable_uart_echo"].get()}')
-        logging.info(f'Setting enable_dio_test:     {settings["enable_dio_test"].get()}')
-        logging.info(f'Setting enable_mouse:        {settings["enable_mouse"].get()}')
-        logging.info(f'Setting enable_bram_test:    {settings["enable_bram_test"].get()}')
-        logging.info(f'Setting dio_mode:            {settings["dio_mode"].get()}')
-        logging.info(f'Setting com_port:            {settings["com_port"]}')
-        logging.info(f'Setting dio_divider:         {settings["dio_divider"].get()}')
+    class test_daemon(daemon_handler):
+        def enlist_daemon(self, settings):
+            self.settings = settings
+            self.test_obj = test_obj()
+            return super().enlist_daemon(self.setup_task, self.loop_task, self.after_task)
+        def stop_daemon(self):
+            return super().stop_daemon()
+        def setup_task(self):
+            self.test_obj.setup_test(self.settings)
+            logging.info("Starting my task")
+        def loop_task(self, cycle):
+            logging.info(f"Cycle {cycle} starting")
+            self.test_obj.run_test()
+        def after_task(self):
+            self.test_obj.stop_test()
+            logging.info("Wrapped up")
 
-        # thread = threading.Thread(target=lambda: dummy_cycle_loop(lambda a, b: push_to_text_box(text_box, a, b), lambda: update_text_box(text_box)), args=())
-        thread = threading.Thread(target=lambda: run_test(
-            lambda a, b: push_to_text_box(text_box, a, b),
-            lambda: update_text_box(text_box),
-            done_callback = lambda: loop_done,
-            settings = settings
-        ), args=())
-        thread.daemon = True
-        thread.start()
-        logging.info("Started test loop")
+    test = test_daemon()
 
-    def stop_loop():
-        global loop_done, thread
-        loop_done = True
-        logging.info(f'Halting test')
-        if thread is None:
-            logging.info(f'No test running to stop')
-            return
-        while thread.is_alive():
-            logging.info("Waiting for test to finish...")
-            sleep(1)
-        loop_done = False
-        logging.info("Test thread closed")
-        thread = None
+    # Button(root, text="Start", command=lambda: daemon.enlist_daemon()).pack()
+    # Button(root, text="Stop", command=lambda: daemon.stop_daemon()).pack()
 
-    def quit_app():
-        stop_loop()
-        logging.info(f"Quitting test app")
-        root.destroy()
+    # thread = None
+    # def start_loop(text_box):
+    #     global thread, loop_done
+    #     if not thread is None: return
 
-    frm          = ttk.Frame(root, padding=10)
-    mode_frm     = ttk.Frame(frm, padding=10)
-    settings_frm = ttk.Frame(frm, padding=10)
+    #     logging.info("Starting Test")
+    #     logging.info(f'Setting enable_xadc:         {settings["enable_xadc"].get()}')
+    #     logging.info(f'Setting enable_flash_id:     {settings["enable_flash_id"].get()}')
+    #     logging.info(f'Setting enable_flash_verify: {settings["enable_flash_verify"].get()}')
+    #     logging.info(f'Setting enable_uart_echo:    {settings["enable_uart_echo"].get()}')
+    #     logging.info(f'Setting enable_dio_test:     {settings["enable_dio_test"].get()}')
+    #     logging.info(f'Setting enable_mouse:        {settings["enable_mouse"].get()}')
+    #     logging.info(f'Setting enable_bram_test:    {settings["enable_bram_test"].get()}')
+    #     logging.info(f'Setting dio_mode:            {settings["dio_mode"].get()}')
+    #     logging.info(f'Setting com_port:            {settings["com_port"]}')
+    #     logging.info(f'Setting dio_divider:         {settings["dio_divider"].get()}')
+
+    #     # thread = threading.Thread(target=lambda: dummy_cycle_loop(args=())
+    #     thread = threading.Thread(target=lambda: run_test(
+    #         done_callback = lambda: loop_done,
+    #         settings = settings
+    #     ), args=())
+    #     thread.daemon = True
+    #     thread.start()
+    #     logging.info("Started test loop")
+
+    # def stop_loop():
+    #     global loop_done, thread
+    #     loop_done = True
+    #     logging.info(f'Halting test')
+    #     if thread is None:
+    #         logging.info(f'No test running to stop')
+    #         return
+    #     while thread.is_alive():
+    #         logging.info("Waiting for test to finish...")
+    #         sleep(1)
+    #     loop_done = False
+    #     logging.info("Test thread closed")
+    #     thread = None
+
+    frm             = ttk.Frame(root, padding=10)
+    mode_frm        = ttk.Frame(frm, padding=10)
+    settings_frm    = ttk.Frame(frm, padding=10)
     dio_numeric_frm = ttk.Frame(frm, padding=10)
-    control_frm  = ttk.Frame(frm, padding=10)
-    log_frame    = ttk.Frame(frm, padding=10)
+    control_frm     = ttk.Frame(frm, padding=10)
+    log_frame       = ttk.Frame(frm, padding=10)
     frm.grid()
     mode_frm.grid(column=0, row=0)
     dio_numeric_frm.grid(column=0, row=1)
@@ -154,10 +171,23 @@ if __name__ == '__main__':
     text_box = Text(log_frame, height=20, width=80)
     text_box.pack()
 
+    init_logging(False, TextHandler(text_box))
+
+    def quit_app(test: test_daemon):
+        test.stop_daemon()
+        logging.info(f"Quitting test app")
+        root.destroy()
+
     # Create a button widget
-    ttk.Button(control_frm, text="Start", command=lambda: start_loop(text_box)).grid(column=0, row=0)
-    ttk.Button(control_frm, text="Stop", command=stop_loop).grid(column=1, row=0)
-    ttk.Button(control_frm, text="Quit", command=quit_app).grid(column=2, row=0)
+    # ttk.Button(control_frm, text="Start", command=lambda: start_loop(text_box)).grid(column=0, row=0)
+    # ttk.Button(control_frm, text="Stop", command=stop_loop).grid(column=1, row=0)
+    ttk.Button(control_frm, text="Start", command=lambda: test.enlist_daemon(settings)).grid(column=0, row=0)
+    ttk.Button(control_frm, text="Stop", command=lambda: test.stop_daemon()).grid(column=1, row=0)
+    ttk.Button(control_frm, text="Quit", command=lambda: quit_app(test)).grid(column=2, row=0)
 
     # Start the main event loop
     root.mainloop()
+
+# To reexport hardware and add error AXI GPIO out conditions to the sw image.
+# To stabilize start/stop/restart loops
+# To make sure timeout errors are logged and that flash verify can error

@@ -31,17 +31,15 @@ def write_qspi_binfile(seed):
         return True
     return False
 
-def program_device(push_to_text_box):
+def program_device():
     script = os.path.join(os.path.dirname(__file__), "program_device.tcl")
     if not os.path.exists(script):
         logging.error(f"Can't find {script}")
-        push_to_text_box(f"[ERROR] Can't find {script}", False)
         return False
     logging.info(f"Calling {script}")
     result = subprocess.call(["vivado", "-mode", "batch", "-source", script], shell=True)
     if result != 0:
         logging.error(f"Couldn't program bitstream into the board")
-        push_to_text_box(f"[ERROR] Couldn't program bitstream into the board", False)
         return False
     return True
 
@@ -51,30 +49,26 @@ def sendint(port, n, w):
 def sendchr(port, c):
     port.write(c.encode('utf-8'))
 
-def ReadXadc(port, push_to_text_box):
+def ReadXadc(port):
     port.write('x'.encode('utf-8'))
 
     raw = port.read(4)
     temp = ((int(raw, 16) // 16) * 503.975) / 4096 - 273.15
     logging.info(f"XSM_CH_TEMP:    {temp} degrees C ({raw})")
-    push_to_text_box(f"XSM_CH_TEMP:    {temp} degrees C ({raw})", False)
 
     raw = port.read(4)
     temp = (int(raw, 16) // 16) / 4096 * 3.0
     logging.info(f"XSM_CH_VCCINT:  {temp} V ({raw})")
-    push_to_text_box(f"XSM_CH_VCCINT:  {temp} V ({raw})", False)
     
     raw = port.read(4)
     temp = (int(raw, 16) // 16) / 4096 * 3.0
     logging.info(f"XSM_CH_VCCAUX:  {temp} V ({raw})")
-    push_to_text_box(f"XSM_CH_VCCAUX:  {temp} V ({raw})", False)
     
     raw = port.read(4)
     temp = (int(raw, 16) // 16) / 4096 * 3.0
     logging.info(f"XSM_CH_VBRAM:   {temp} V ({raw})")
-    push_to_text_box(f"XSM_CH_VBRAM:   {temp} V ({raw})", False)
 
-def TestEcho(port, push_to_text_box, size=100):
+def TestEcho(port, size=100):
     sendchr(port, 'e')
     sendint(port, 100, 2)
     random_data = np.random.randint(0, 128, size=100).astype(np.uint8)
@@ -84,36 +78,42 @@ def TestEcho(port, push_to_text_box, size=100):
     for i in range(0, 100):
         if echo[i] != data[i]:
             logging.error(f"Echo test failed: Mismatch in echoed data at position {i}, {echo[i]} != {data[i]}")
-            push_to_text_box(f"[ERROR] Echo test failed: Mismatch in echoed data at position {i}, {echo[i]} != {data[i]}", False)
             break
     else:
         logging.info("Echo test passed")
-        push_to_text_box("Echo test passed", False)
 
-def FlashReadId(port, push_to_text_box):
+def FlashReadId(port):
     sendchr(port, 'f')
     id = int(port.read(6), 16)
     if id != 0x1620c2:
         logging.error(f"Flash read ID failed: Unexpected flash ID of {hex(id)}")
-        push_to_text_box(f"[ERROR] Flash read ID failed: Unexpected flash ID of {hex(id)}", False)
     else:
         logging.info(f"Flash read ID succeeded: Macronix flash ID ({hex(id)}) detected")
-        push_to_text_box(f"Flash read ID succeeded: Macronix flash ID ({hex(id)}) detected", False)
 
-def FlashRead(port, seed, push_to_text_box):
+def FlashRead(port, seed):
     sendchr(port, 'q')
     sendint(port, seed, 8)
-    read_passes = int(port.read(1), 16) # '0' is a pass
+
+    time.sleep(0.2)
+    
+    starttime = datetime.now()
+    done = False
+    while not done:
+        read_passes = port.read(1)
+        if read_passes != b'':
+            done = True
+    read_passes = int(read_passes, 16) # '0' is a pass
+    timepassed = (datetime.now() - starttime).total_seconds()
+    logging.info(f"Flash read completed after {timepassed} seconds")
+    
     error_count = int(port.read(8), 16)
     first = int(port.read(8), 16)
     last  = int(port.read(8), 16)
     if read_passes != 0:
         logging.error(f"Flash read failed: Contents did not match expectation, error_count={error_count}, first={hex(first).zfill(8)}, last={hex(last).zfill(8)}")
-        push_to_text_box(f"[ERROR] Flash read failed: Contents did not match expectation, error_count={error_count}, first={hex(first).zfill(8)}, last={hex(last).zfill(8)}", False)
     else:
         logging.info(f"Flash read passed, first value seen: {hex(first).zfill(8)}, last: {hex(last).zfill(8)}")
-        push_to_text_box(f"Flash read passed, first value seen: {hex(first).zfill(8)}, last: {hex(last).zfill(8)}", False)
-
+    
 DIO_SETTINGS_ADDR = 12
 DIO_STATUS_ADDR = 16
 PS2_POS_ADDR = 20
@@ -130,63 +130,53 @@ DIO_MODE_EMISSIONS = 3
 def testbit(n, b):
     return ((n >> b) & 0x1) == 1
 
-def CheckDio(port, push_to_text_box):
+def CheckDio(port):
     sendchr(port, 'r')
     sendint(port, DIO_STATUS_ADDR, 2)
     status = int(port.read(8), 16)
 
     if (status & 0x10000) != 0:
         logging.error(f"DIO not running")
-        push_to_text_box(f"[ERROR] DIO not running", False)
     else:
         logging.info(f"DIO counters are running")
-        push_to_text_box(f"DIO counters are running", False)
     
     if (status & 0x20000) != 0:
         logging.error(f"Invalid DIO phase/divider configuration - check setup")
-        push_to_text_box(f"[ERROR] Invalid DIO phase/divider configuration - check setup", False)
     
     if (status & 0xffff) != 0:
         logging.error(f"Invalid DIO bits detected ({hex(status & 0xffff)}) since the last read")
-        push_to_text_box(f"[ERROR] Invalid DIO bits detected ({hex(status & 0xffff)}) since the last read", False)
     else:
         logging.info(f"All DIO samples match")
-        push_to_text_box(f"All DIO samples match", False)
 
-def StartDio(port, mode, phase, divider, push_to_text_box):
+def StartDio(port, mode, phase, divider):
     settings = ((mode & 0x3) << 16) | ((phase & 0xff) << 8) | ((divider & 0xff))
-    print(f"DIO settings: {hex(settings)[2:].zfill(8)}")
+    logging.info(f"Starting DIO with settings: mode:{mode}, phase:{phase}, divider:{divider}")
     sendchr(port, 'w')
     sendint(port, DIO_SETTINGS_ADDR, 2)
     sendint(port, settings, 8)
-    CheckDio(port, push_to_text_box)
-    
-def CheckMouse(port, push_to_text_box):
+    CheckDio(port)
+
+def CheckMouse(port):
     sendchr(port, 'r')
     sendint(port, PS2_POS_ADDR, 2)
     status = int(port.read(8), 16)
 
     if not testbit(status, 26):
-        logging.info("Mouse data is stale")
-        push_to_text_box("Mouse data is stale", False)
+        logging.error("Mouse data is stale")
         return False
     else:
         logging.info(f"New status received from mouse")
-        push_to_text_box(f"New status received from mouse", False)
-
+        
     if testbit(status, 25):
         logging.error("Mouse not initialized")
-        push_to_text_box("[ERROR] Mouse not initialized", False)
-
+        
     if testbit(status, 24):
         logging.error("Mouse read ID failed, possible disconnect")
-        push_to_text_box("[ERROR] Mouse read ID failed, possible disconnect", False)
-
+        
     logging.info(f"Mouse position: Y={(status>>12) & 0xfff}; X={(status & 0xfff)}")
-    push_to_text_box(f"Mouse position: Y={(status>>12) & 0xfff}; X={(status & 0xfff)}", False)
     return True
 
-def CheckBram(port, push_to_text_box):
+def CheckBram(port):
     seed = np.random.randint(0, 2**32, dtype=np.uint32)
     
     sendchr(port, 'w')
@@ -200,20 +190,106 @@ def CheckBram(port, push_to_text_box):
     if testbit(status, 1):
         if testbit(status, 0):
             logging.info("BRAM test passed")
-            push_to_text_box("BRAM test passed", False)
         else:
             logging.error("BRAM test failed")
-            push_to_text_box("[ERROR] BRAM test failed", False)
         return True
 
-    logging.warning("BRAM test not complete")
-    push_to_text_box("[WARNING] BRAM test not complete", False)
+    logging.error("BRAM test not complete")
     return False
 
 def get_portlist():
     print ([port.device for port in serial.tools.list_ports.comports()])
 
-def run_test(push_to_text_box, update_text_box, done_callback, settings):
+class test_obj:
+    def __init__(self):
+        self.port = None
+    def setup_test(self, settings):
+        self.dio_mode = settings["dio_mode"].get()
+        self.com_port = settings["com_port"]
+        self.dio_divider = settings["dio_divider"].get()
+        self.dio_mode = settings["dio_mode"].get()
+        self.enable_xadc = settings["enable_xadc"].get()
+        self.enable_flash_id = settings["enable_flash_id"].get()
+        self.enable_flash_verify = settings["enable_flash_verify"].get()
+        self.enable_uart_echo = settings["enable_uart_echo"].get()
+        self.enable_dio_test = settings["enable_dio_test"].get()
+        self.enable_mouse = settings["enable_mouse"].get()
+        self.enable_bram_test = settings["enable_bram_test"].get()
+
+        logging.info("Starting Test")
+        logging.info(f'Setting enable_xadc:         {settings["enable_xadc"].get()}')
+        logging.info(f'Setting enable_flash_id:     {settings["enable_flash_id"].get()}')
+        logging.info(f'Setting enable_flash_verify: {settings["enable_flash_verify"].get()}')
+        logging.info(f'Setting enable_uart_echo:    {settings["enable_uart_echo"].get()}')
+        logging.info(f'Setting enable_dio_test:     {settings["enable_dio_test"].get()}')
+        logging.info(f'Setting enable_mouse:        {settings["enable_mouse"].get()}')
+        logging.info(f'Setting enable_bram_test:    {settings["enable_bram_test"].get()}')
+        logging.info(f'Setting dio_mode:            {settings["dio_mode"].get()}')
+        logging.info(f'Setting com_port:            {settings["com_port"]}')
+        logging.info(f'Setting dio_divider:         {settings["dio_divider"].get()}')
+    
+        if self.dio_mode == DIO_MODE_IMMUNITY_TOP_TO_BOTTOM or self.dio_mode == DIO_MODE_IMMUNITY_PORT_PAIRS:
+            logging.info("Starting IMMUNITY test sequence")
+        elif self.dio_mode == DIO_MODE_EMISSIONS:
+            logging.info("Starting EMISSIONS test sequence")
+        else:
+            logging.info("Starting test sequence with DIO off")
+
+        self.qspi_seed = np.random.randint(0, 2**32, dtype=np.uint32)
+        self.init_sequence = 0
+
+    def write_qspi(self):
+        if self.enable_flash_verify:
+            logging.info(f"Writing QSPI...")
+            if not write_qspi_binfile(self.qspi_seed):
+                return
+        else:
+            logging.info(f"Skipping QSPI write, Flash read test is not enabled")
+
+    def program_device(self):
+        logging.info(f"Writing FPGA image...")
+        if not program_device():
+            return
+        
+    def run_test(self):
+        # implement as a state machine so that the loop controller can check for a stop button press between long blocks
+        if self.init_sequence == 0:
+            self.write_qspi()
+            self.init_sequence += 1
+            return
+        if self.init_sequence == 1:
+            self.program_device()
+            self.init_sequence += 1
+            return
+        if self.init_sequence == 2:
+            logging.info(f"Connecting to board on port {self.com_port}")
+            self.port = ser.Serial(port=self.com_port, baudrate=115200, timeout=0.4)
+            self.phase = ((self.dio_divider + 1) // 2) - 1        
+            StartDio(self.port, self.dio_mode, self.phase, self.dio_divider)
+            logging.info(f"DIO counter output frequency is set to {100_000_000 / (2 * (self.dio_divider + 1))} MHz")
+            logging.info(f"DIO readback phase count is set to {self.phase} / {self.dio_divider}")
+            self.init_sequence += 1
+            self.iteration = 0
+            return
+        if self.init_sequence >= 3:
+            targettime = datetime.now() + timedelta(seconds=1)
+            
+            if self.enable_xadc: ReadXadc(self.port)
+            if self.enable_flash_id: FlashReadId(self.port)
+            if self.enable_flash_verify: FlashRead(self.port, self.qspi_seed)
+            if self.enable_uart_echo: TestEcho(self.port)
+            if self.enable_dio_test: CheckDio(self.port)
+            if self.enable_mouse: CheckMouse(self.port)
+            if self.enable_bram_test: CheckBram(self.port)
+            
+            timeleft = (targettime - datetime.now()).total_seconds()
+            if timeleft > 0: time.sleep(timeleft)
+
+    def stop_test(self):
+        if not self.port is None:
+            self.port.close()
+
+def run_test(done_callback, settings):
     dio_mode = settings["dio_mode"].get()
     com_port = settings["com_port"]
     dio_divider = settings["dio_divider"].get()
@@ -228,64 +304,63 @@ def run_test(push_to_text_box, update_text_box, done_callback, settings):
 
     if dio_mode == DIO_MODE_IMMUNITY_TOP_TO_BOTTOM or dio_mode == DIO_MODE_IMMUNITY_PORT_PAIRS:
         logging.info("Starting IMMUNITY test sequence")
-        push_to_text_box("Starting IMMUNITY test sequence", True)
     elif dio_mode == DIO_MODE_EMISSIONS:
         logging.info("Starting EMISSIONS test sequence")
-        push_to_text_box("Starting EMISSIONS test sequence", True)
     else:
         logging.info("Starting test sequence with DIO off")
-        push_to_text_box("Starting test sequence with DIO off", True)
 
     qspi_seed = np.random.randint(0, 2**32, dtype=np.uint32)
 
     if done_callback(): return
 
-    logging.info(f"Writing QSPI...")
-    push_to_text_box(f"Writing QSPI...", True)
-    if not write_qspi_binfile(qspi_seed):
-        return
+    if enable_flash_verify:
+        logging.info(f"Writing QSPI...")
+        if not write_qspi_binfile(qspi_seed):
+            return
+    else:
+        logging.info(f"Skipping QSPI write, Flash read test is not enabled")
     
     if done_callback(): return
     
     logging.info(f"Writing FPGA image...")
-    push_to_text_box(f"Writing FPGA image...", True)
-    if not program_device(push_to_text_box):
+    if not program_device():
         return
 
     program_only = False
     if program_only: exit()
 
     logging.info(f"Connecting to board on port {com_port}")
-    push_to_text_box(f"Connecting to board on port {com_port}", True)
 
-    with ser.Serial(port=com_port, baudrate=115200) as port:
+    iteration = 0
+
+    with ser.Serial(port=com_port, baudrate=115200, timeout=0.4) as port:
     # with ser.Serial(port=sys.argv[1], baudrate=115200, timeout=0.1) as port:
         # Start DIO test
         phase = ((dio_divider + 1) // 2) - 1
         
-        StartDio(port, dio_mode, phase, dio_divider, push_to_text_box)
+        StartDio(port, dio_mode, phase, dio_divider)
         logging.info(f"DIO counter output frequency is set to {100_000_000 / (2 * (dio_divider + 1))} MHz")
         logging.info(f"DIO readback phase count is set to {phase} / {dio_divider}")
 
         while not done_callback():
             targettime = datetime.now() + timedelta(seconds=1)
+            iteration += 1
+            logging.info(f"Cycle #{iteration}")
             # Read XADC
-            if enable_xadc: ReadXadc(port, push_to_text_box)
+            if enable_xadc: ReadXadc(port)
             # Do a Read ID
-            if enable_flash_id: FlashReadId(port, push_to_text_box)
+            if enable_flash_id: FlashReadId(port)
             # Do a SPI read
-            if enable_flash_verify: FlashRead(port, qspi_seed, push_to_text_box)
+            if enable_flash_verify: FlashRead(port, qspi_seed)
             # Echo random data
-            if enable_uart_echo: TestEcho(port, push_to_text_box)
+            if enable_uart_echo: TestEcho(port)
             # Check DIO test
-            if enable_dio_test: CheckDio(port, push_to_text_box)
+            if enable_dio_test: CheckDio(port)
             # Check mouse connectivity
-            if enable_mouse: CheckMouse(port, push_to_text_box)
+            if enable_mouse: CheckMouse(port)
             # Run BRAM memory test
-            if enable_bram_test: CheckBram(port, push_to_text_box)
+            if enable_bram_test: CheckBram(port)
             
-            update_text_box()
-
             timeleft = (targettime - datetime.now()).total_seconds()
             if timeleft > 0: time.sleep(timeleft)
 

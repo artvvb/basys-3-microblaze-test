@@ -3,6 +3,7 @@
 # Except
 !gui.py
 !test.py
+!daemon.py
 !program_device.tcl
 !program_qspi.tcl
 !.gitignore
