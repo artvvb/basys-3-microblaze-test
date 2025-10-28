@@ -27,22 +27,30 @@ module bram_test #(
     input  logic        seed_tvalid,
     output logic        seed_tready,
     input  logic [31:0] seed_tdata,
+    input  logic        addr_max_tvalid,
+    input  logic [31:0] addr_max_tdata,
+    output logic        addr_max_tready,
     output logic [31:0] status_tdata, // "0" + {reset busy, done, test passed}
     output logic        status_tvalid,
     input  logic        status_tready,
     output logic        error
 );
-    localparam integer ADDR_WIDTH = 10;
-    localparam logic [ADDR_WIDTH-1:0] ADDR_MAX = 'h3ff;
+    localparam integer ADDR_WIDTH = 13;
+    localparam logic [31:0] ADDR_MAX = 'h1fff; // {number of times to loop over the address space, address max}
 
     logic [31:0] seed;
     logic [31:0] wdata;
-    logic [31:0] rdata;
-    logic reset_busy;
+    logic [31:0] rdata_0;
+    logic [31:0] rdata_1;
+    logic reset_busy_0;
+    logic reset_busy_1;
     logic [ADDR_WIDTH-1:0] addr;
     logic wen, en;
     
-    localparam logic [ADDR_WIDTH-1:0] ADDR_READ_VALID = 'd2;
+    localparam logic [ADDR_WIDTH-1:0] ADDR_READ_VALID = 'd2; // switchover period
+    logic [31:0] addr_max_reg;
+    logic en_bank_1;
+    logic [32-ADDR_WIDTH-1:0] loops;
     
     enum integer {
         RESET_BUSY,
@@ -55,19 +63,46 @@ module bram_test #(
     } state;
     
     always_comb seed_tready = WAIT_FOR_SEED;
+    always_comb addr_max_tready = WAIT_FOR_SEED;
+    
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            addr_max_reg <= ADDR_MAX;
+        end else if (addr_max_tvalid && addr_max_tready) begin
+            addr_max_reg <= addr_max_tdata;
+        end
+    end
+    
+    logic [ADDR_WIDTH-1:0] addr_max;
+    always_comb addr_max = addr_max_reg[ADDR_WIDTH-1:0];
     
     always_ff @(posedge clk) begin
         if (reset) begin
             state <= RESET_BUSY;
         end else case (state)
-        RESET_BUSY:         if (!reset_busy)                    state <= WAIT_FOR_SEED;
+        RESET_BUSY:         if (!reset_busy_0 && !reset_busy_1) state <= WAIT_FOR_SEED;
         WAIT_FOR_SEED:      if (seed_tvalid)                    state <= WRITE;
-        WRITE:              if (addr == ADDR_MAX)               state <= SWITCHOVER;
+        WRITE:              if (addr == addr_max)               state <= SWITCHOVER;
         SWITCHOVER:         if (addr + 1 == ADDR_READ_VALID)    state <= READ;
-        READ:               if (addr == ADDR_MAX)               state <= FLUSH;
-        FLUSH:              if (addr + 1 == ADDR_READ_VALID)    state <= WAIT_FOR_STATUS;
-        WAIT_FOR_STATUS:    if (status_tready)                  state <= WAIT_FOR_SEED;
+        READ:               if (addr == addr_max)               state <= FLUSH;
+        FLUSH:              if (addr + 1 == ADDR_READ_VALID) begin
+                                if (loops == 0)
+                                    state <= WAIT_FOR_STATUS;
+                                else
+                                    state <= WRITE;
+                            end
+        WAIT_FOR_STATUS:    if (status_tready) state <= WAIT_FOR_SEED;
         endcase
+    end
+    
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            loops <= 0;
+        end else if (addr_max_tvalid && addr_max_tready) begin
+            loops <= addr_max_tdata[ADDR_WIDTH+:32-ADDR_WIDTH];
+        end else if (state == FLUSH && addr + 1 == ADDR_READ_VALID && loops > 0) begin
+            loops <= loops - 1;
+        end
     end
     
     always_ff @(posedge clk) begin
@@ -75,7 +110,9 @@ module bram_test #(
             addr <= 'b0;
         end else if (state == WAIT_FOR_SEED || state == WAIT_FOR_STATUS) begin
             addr <= 'b0;
-        end else if (addr == ADDR_MAX) begin
+        end else if (addr == addr_max) begin
+            addr <= 'b0;
+        end else if (addr + 1 == ADDR_READ_VALID && state == FLUSH) begin
             addr <= 'b0;
         end else begin
             addr <= addr + 1;
@@ -85,22 +122,31 @@ module bram_test #(
     always_ff @(posedge clk) begin
         if (reset) begin
             seed <= 0;
-        end else if (state == WAIT_FOR_SEED) begin
-            if (seed_tvalid) begin
-                seed <= seed_tdata;
-            end
+        end else if (seed_tready && seed_tvalid) begin
+            seed <= seed_tdata;
+        end
+    end
+    
+    logic [31:0] rdata_compare;
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            rdata_compare <= 0;
+        end else if (state == WAIT_FOR_SEED && seed_tvalid) begin
+            rdata_compare <= seed_tdata;
+        end else if (state == READ) begin
+            rdata_compare <= {rdata_compare[30:0], rdata_compare[31] ^ rdata_compare[21] ^ rdata_compare[1] ^ rdata_compare[0]};
+//            rdata_compare <= rdata_compare + 1;
         end
     end
     
     always_ff @(posedge clk) begin
         if (reset) begin
             wdata <= 0;
-        end else if (state == WAIT_FOR_SEED) begin
+        end else if (state == WAIT_FOR_SEED && seed_tvalid) begin
             wdata <= seed_tdata; 
-        end else if (state == WRITE && addr == ADDR_MAX) begin
-            wdata <= seed;
-        end else if (state == WRITE || state == READ) begin
+        end else if (state == WRITE) begin
             wdata <= {wdata[30:0], wdata[31] ^ wdata[21] ^ wdata[1] ^ wdata[0]};
+//            wdata <= wdata + 1;
         end
     end
     
@@ -108,9 +154,11 @@ module bram_test #(
         if (reset) begin
             status_tdata[0] <= 1;
             error <= 0;
-        end else if (state == READ && addr >= ADDR_READ_VALID && wdata != rdata) begin
-            status_tdata[0] <= 0;
-            error <= 1;
+        end else if (state == READ && addr >= ADDR_READ_VALID) begin
+            if (rdata_compare != rdata_0 || (rdata_compare != rdata_1 && en_bank_1)) begin
+                status_tdata[0] <= 0;
+                error <= 1;
+            end
         end else if (state == WAIT_FOR_SEED) begin
             status_tdata[0] <= 1;
             error <= 0;
@@ -122,15 +170,26 @@ module bram_test #(
     
     always_comb wen = (state == WRITE);
     always_comb en = (state == WRITE || state == SWITCHOVER || state == READ);    
+    always_comb en_bank_1 = addr_max_reg[31];
     
-    blk_mem_gen_0 bram_inst (
+    blk_mem_gen_0 bram_bank_0_inst (
         .clka       (clk),          // input wire clka
         .rsta       (reset),        // input wire rsta
         .ena        (en),           // input wire ena
         .wea        (wen),          // input wire [0 : 0] wea
         .addra      (addr),         // input wire [ADDR_WIDTH-1 : 0] addra
         .dina       (wdata),        // input wire [31 : 0] dina
-        .douta      (rdata),        // output wire [31 : 0] douta
-        .rsta_busy  (reset_busy)    // output wire rsta_busy
+        .douta      (rdata_0),      // output wire [31 : 0] douta
+        .rsta_busy  (reset_busy_0)    // output wire rsta_busy
+    );
+    blk_mem_gen_0 bram_bank_1_inst (
+        .clka       (clk),          // input wire clka
+        .rsta       (reset),        // input wire rsta
+        .ena        (en && en_bank_1),  // input wire ena
+        .wea        (wen && en_bank_1), // input wire [0 : 0] wea
+        .addra      (addr),         // input wire [ADDR_WIDTH-1 : 0] addra
+        .dina       (wdata),        // input wire [31 : 0] dina
+        .douta      (rdata_1),      // output wire [31 : 0] douta
+        .rsta_busy  (reset_busy_1)  // output wire rsta_busy
     );
 endmodule

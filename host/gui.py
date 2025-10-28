@@ -1,59 +1,57 @@
-from tkinter import *
-from tkinter import ttk
-import logging
-from datetime import datetime, timedelta
-import time
-from time import sleep
-import threading
-import sys
-
-def init_logging(include_console=False, text_handler=None):
-    logging.basicConfig(level=logging.INFO)
-    log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-    logger = logging.getLogger()
-
-    file_handler = logging.FileHandler("temp.log")
-    file_handler.setFormatter(log_formatter)
-    logger.addHandler(file_handler)
-
-    if include_console:
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(log_formatter)
-        logger.addHandler(console_handler)
-
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    logger = logging.getLogger()
-    logger.addHandler(text_handler)
-
-class TextHandler(logging.Handler):
-    def __init__(self, text_widget):
-        super().__init__()
-        self.text_widget = text_widget
-    def emit(self, record):
-        msg = f"{record.levelname}: {self.format(record)}"
-        def append():
-            self.text_widget.configure(state='normal')
-            self.text_widget.insert(END, msg + '\n')
-            self.text_widget.configure(state='disabled')
-            self.text_widget.yview(END)
-        self.text_widget.after(0, append)
-
-def dummy_cycle_loop(done_callback):
-    n = 0
-    while not done_callback():
-        targettime = datetime.now() + timedelta(seconds=1)
-
-        logging.info(f"Cycle {n}")
-        n += 1
-        timeleft = (targettime - datetime.now()).total_seconds()
-        if timeleft > 0:
-            time.sleep(timeleft)
-
-loop_done = False
-
-from test import run_test
-
 if __name__ == '__main__':
+    from tkinter import *
+    from tkinter import ttk
+    import logging
+    from datetime import datetime, timedelta
+    from time import sleep
+    import sys
+    from test import run_test
+
+    from daemon import daemon_handler
+    from test import test_obj
+
+    def init_logging(include_console=False, text_handler=None):
+        logging.basicConfig(level=logging.INFO)
+        log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+        logger = logging.getLogger()
+
+        file_handler = logging.FileHandler("temp.log")
+        file_handler.setFormatter(log_formatter)
+        logger.addHandler(file_handler)
+
+        if include_console:
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(log_formatter)
+            logger.addHandler(console_handler)
+
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        logger = logging.getLogger()
+        logger.addHandler(text_handler)
+
+    # TextHandler for logging that connects the logger to a tkinter text widget.
+    #   only maintains the last several "blocks", sections of text defined by a detectable pattern in the logged strings
+    class TextHandler(logging.Handler):
+        def __init__(self, text_widget):
+            super().__init__()
+            self.text_widget = text_widget
+            self.start_of_block = "1.0"
+        def emit(self, record):
+            msg = self.format(record)
+            self.text_widget.configure(state='normal') # allow writing to the block
+            # if the controlling thread sends a block marker, clear everything before the previous and append latest
+            if self.mark_block(msg):
+                r = int(self.start_of_block.split('.')[0]) - 1
+                if r > 0: self.text_widget.delete(1.0, f"{r}.0")
+                self.start_of_block = self.text_widget.index(END)
+            self.text_widget.insert(END, msg + '\n')
+            self.text_widget.configure(state='disabled') # disable user from writing to the block
+        def mark_block(self, msg):
+            if msg.split(' ')[0] == "Cycle":
+                return True
+            if msg == "Wrapped up": 
+                return True
+            return False
+
     # Create the main window
     root = Tk()
     root.title('Basys 3 Test')
@@ -70,9 +68,6 @@ if __name__ == '__main__':
         "dio_mode":             IntVar(root, 1),
         "com_port":             sys.argv[1]
     }
-
-    from daemon import daemon_handler
-    from test import test_obj
 
     class test_daemon(daemon_handler):
         def enlist_daemon(self, settings):
@@ -93,48 +88,6 @@ if __name__ == '__main__':
 
     test = test_daemon()
 
-    # Button(root, text="Start", command=lambda: daemon.enlist_daemon()).pack()
-    # Button(root, text="Stop", command=lambda: daemon.stop_daemon()).pack()
-
-    # thread = None
-    # def start_loop(text_box):
-    #     global thread, loop_done
-    #     if not thread is None: return
-
-    #     logging.info("Starting Test")
-    #     logging.info(f'Setting enable_xadc:         {settings["enable_xadc"].get()}')
-    #     logging.info(f'Setting enable_flash_id:     {settings["enable_flash_id"].get()}')
-    #     logging.info(f'Setting enable_flash_verify: {settings["enable_flash_verify"].get()}')
-    #     logging.info(f'Setting enable_uart_echo:    {settings["enable_uart_echo"].get()}')
-    #     logging.info(f'Setting enable_dio_test:     {settings["enable_dio_test"].get()}')
-    #     logging.info(f'Setting enable_mouse:        {settings["enable_mouse"].get()}')
-    #     logging.info(f'Setting enable_bram_test:    {settings["enable_bram_test"].get()}')
-    #     logging.info(f'Setting dio_mode:            {settings["dio_mode"].get()}')
-    #     logging.info(f'Setting com_port:            {settings["com_port"]}')
-    #     logging.info(f'Setting dio_divider:         {settings["dio_divider"].get()}')
-
-    #     # thread = threading.Thread(target=lambda: dummy_cycle_loop(args=())
-    #     thread = threading.Thread(target=lambda: run_test(
-    #         done_callback = lambda: loop_done,
-    #         settings = settings
-    #     ), args=())
-    #     thread.daemon = True
-    #     thread.start()
-    #     logging.info("Started test loop")
-
-    # def stop_loop():
-    #     global loop_done, thread
-    #     loop_done = True
-    #     logging.info(f'Halting test')
-    #     if thread is None:
-    #         logging.info(f'No test running to stop')
-    #         return
-    #     while thread.is_alive():
-    #         logging.info("Waiting for test to finish...")
-    #         sleep(1)
-    #     loop_done = False
-    #     logging.info("Test thread closed")
-    #     thread = None
 
     frm             = ttk.Frame(root, padding=10)
     mode_frm        = ttk.Frame(frm, padding=10)
@@ -179,15 +132,9 @@ if __name__ == '__main__':
         root.destroy()
 
     # Create a button widget
-    # ttk.Button(control_frm, text="Start", command=lambda: start_loop(text_box)).grid(column=0, row=0)
-    # ttk.Button(control_frm, text="Stop", command=stop_loop).grid(column=1, row=0)
     ttk.Button(control_frm, text="Start", command=lambda: test.enlist_daemon(settings)).grid(column=0, row=0)
     ttk.Button(control_frm, text="Stop", command=lambda: test.stop_daemon()).grid(column=1, row=0)
     ttk.Button(control_frm, text="Quit", command=lambda: quit_app(test)).grid(column=2, row=0)
 
     # Start the main event loop
     root.mainloop()
-
-# To reexport hardware and add error AXI GPIO out conditions to the sw image.
-# To stabilize start/stop/restart loops
-# To make sure timeout errors are logged and that flash verify can error

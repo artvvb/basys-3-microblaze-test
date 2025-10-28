@@ -18,7 +18,7 @@ def generate_qspi_simfile(seed):
     size = 1024 * 128 # reading a single page burst per loop keeps the read time below a second; 1024*1024 = 32 Mebi-bit flash part
     lfsr = seed
     binfile_name = os.path.join(os.path.dirname(__file__), "random_data.bin")
-    logging.info(f"Writing {binfile_name} with random data (seed={hex(seed)}, expected first word {hex(lfsr_next(seed))})")
+    logging.info(f"Writing {binfile_name} with random data (seed={hex(seed)}, expecting first word {hex(lfsr_next(seed))})")
     with open(binfile_name, "wb") as binfile:
         for _ in range(size):
             lfsr = lfsr_next(lfsr)
@@ -118,7 +118,9 @@ DIO_SETTINGS_ADDR = 12
 DIO_STATUS_ADDR = 16
 PS2_POS_ADDR = 20
 BRAM_SEED_ADDR = 24
-BRAM_STATUS_ADDR = 28
+BRAM_ADDR_MAX_ADDR = 28
+BRAM_STATUS_ADDR = 32
+BRAM_ADDR_BITS = 13
 
 DIO_MODE_OFF = 0
 DIO_MODE_IMMUNITY_TOP_TO_BOTTOM = 1
@@ -144,7 +146,7 @@ def CheckDio(port):
         logging.error(f"Invalid DIO phase/divider configuration - check setup")
     
     if (status & 0xffff) != 0:
-        logging.error(f"Invalid DIO bits detected ({hex(status & 0xffff)}) since the last read")
+        logging.error(f"Invalid DIO bits detected ({hex(status & 0xffff).zfill(4)}) since the last read")
     else:
         logging.info(f"All DIO samples match")
 
@@ -179,6 +181,10 @@ def CheckMouse(port):
 def CheckBram(port):
     seed = np.random.randint(0, 2**32, dtype=np.uint32)
     
+    sendchr(port, 'w')
+    sendint(port, BRAM_ADDR_MAX_ADDR, 2)
+    sendint(port, ((1 << BRAM_ADDR_BITS) - 1) | (0x0 << BRAM_ADDR_BITS), 8)
+
     sendchr(port, 'w')
     sendint(port, BRAM_SEED_ADDR, 2)
     sendint(port, seed, 8)
@@ -252,7 +258,7 @@ class test_obj:
             return
         
     def run_test(self):
-        # implement as a state machine so that the loop controller can check for a stop button press between long blocks
+        # implemented as a state machine so that the loop controller can check for a stop button press between long blocking calls
         if self.init_sequence == 0:
             self.write_qspi()
             self.init_sequence += 1
@@ -263,11 +269,15 @@ class test_obj:
             return
         if self.init_sequence == 2:
             logging.info(f"Connecting to board on port {self.com_port}")
+            # note: a much shorter timeout can't be used as long as the flash read cycle stays fully blocking
             self.port = ser.Serial(port=self.com_port, baudrate=115200, timeout=0.4)
-            self.phase = ((self.dio_divider + 1) // 2) - 1        
+            self.phase = ((self.dio_divider + 1) // 2) - 1
             StartDio(self.port, self.dio_mode, self.phase, self.dio_divider)
             logging.info(f"DIO counter output frequency is set to {100_000_000 / (2 * (self.dio_divider + 1))} MHz")
             logging.info(f"DIO readback phase count is set to {self.phase} / {self.dio_divider}")
+            # ConfigureBram(self.port, self.bram_bank_1_en, self.bram_max_addr)
+            # logging.info(f"DIO counter output frequency is set to {100_000_000 / (2 * (self.dio_divider + 1))} MHz")
+            # logging.info(f"DIO readback phase count is set to {self.phase} / {self.dio_divider}")
             self.init_sequence += 1
             self.iteration = 0
             return
@@ -280,7 +290,7 @@ class test_obj:
             if self.enable_uart_echo: TestEcho(self.port)
             if self.enable_dio_test: CheckDio(self.port)
             if self.enable_mouse: CheckMouse(self.port)
-            if self.enable_bram_test: CheckBram(self.port)
+            if self.enable_bram_test: CheckBram(self.port, )
             
             timeleft = (targettime - datetime.now()).total_seconds()
             if timeleft > 0: time.sleep(timeleft)
@@ -392,7 +402,5 @@ if __name__ == "__main__":
     }
     run_test(lambda a, b: True, lambda a: True, settings)
 
-# Add UI or at least static view of most recent log pass; include com port and stop button
-# Add controls to turn off each of the steps above
-# Double check flash programming
-# Add switch to flip into emissions mode
+# BRAM: Add continuous immunity mode?
+#       Implement controls for bank 1 and addressing in GUI.
