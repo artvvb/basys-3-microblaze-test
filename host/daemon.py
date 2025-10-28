@@ -1,5 +1,6 @@
 import threading
 
+# Simple threading wrapper to manage starting up and shutting down a loop safely
 class daemon_handler:
     def __init__(self):
         self.end_loop = False
@@ -13,8 +14,9 @@ class daemon_handler:
     def enlist_daemon(self, setup, task, after_task):
         if not self.thread is None and self.thread.is_alive(): return
         self.end_loop = False
-        setup()
+        setup() # run callback to do any necessary setup functions after the checks to see if we can start - helps ensure we only call setup once
         self.thread = threading.Thread(target=lambda: self.daemon_task(task, after_task), args=())
+        # setting daemon true instead of using default threading allows quitting the external python context to still clean this thread up
         self.thread.daemon = True
         self.thread.start()
     def stop_daemon(self):
