@@ -24,7 +24,7 @@ module axi_sim;
     logic clk;
     logic reset;
     logic pxl_clk;
-    logic pxl_clk_reset;
+    logic pxl_clk_aresetn;
     logic [15:0] sw = 0;
     logic [15:0] led;
     logic [3:0]  vga_r;
@@ -71,6 +71,9 @@ module axi_sim;
     logic        control_rready = 1;
     logic [1:0]  control_rresp;
 
+    logic flash_error;
+    logic uart_error;
+
     top dut (.*);
     
     initial begin
@@ -92,9 +95,9 @@ module axi_sim;
     end
     
     initial begin
-        pxl_clk_reset = 0;
-        @(posedge pxl_clk) pxl_clk_reset <= 1;
-        @(posedge pxl_clk) pxl_clk_reset <= 0;
+        pxl_clk_aresetn = 0;
+        @(posedge pxl_clk) pxl_clk_aresetn <= 0;
+        @(posedge pxl_clk) pxl_clk_aresetn <= 1;
     end
     
     
@@ -185,7 +188,8 @@ module axi_sim;
         pass <= 'bz;
         
         #100;
-        axi_write(dut.BRAM_SEED_ADDR, 32'hdeadbeef);
+        axi_write(dut.BRAM_SEED_ADDR, 32'h0);
+        axi_write(dut.BRAM_ADDR_MAX_ADDR, 32'h00005fff);
         axi_read(dut.BRAM_STATUS_ADDR, rdata);
         while (!rdata[1])
             axi_read(dut.BRAM_STATUS_ADDR, rdata);
