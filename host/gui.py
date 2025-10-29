@@ -6,7 +6,7 @@ if __name__ == '__main__':
     from time import sleep
     import sys
     from test import run_test
-
+    import os
     from daemon import daemon_handler
     from test import test_obj
 
@@ -15,6 +15,8 @@ if __name__ == '__main__':
         log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
         logger = logging.getLogger()
 
+        i = 0
+        while os.path.exists("run_{i}.log"): i += 1
         file_handler = logging.FileHandler("temp.log")
         file_handler.setFormatter(log_formatter)
         logger.addHandler(file_handler)
@@ -64,8 +66,10 @@ if __name__ == '__main__':
         "enable_dio_test":      BooleanVar(root, True),
         "enable_mouse":         BooleanVar(root, True),
         "enable_bram_test":     BooleanVar(root, True),
-        "dio_divider":          IntVar(root, 3),
+        "dio_divider":          IntVar(root, 49),
         "dio_mode":             IntVar(root, 1),
+        "bram_both_banks":      BooleanVar(root, True),
+        "bram_max_address":     IntVar(root, 0x1fff),
         "com_port":             sys.argv[1]
     }
 
@@ -88,7 +92,6 @@ if __name__ == '__main__':
 
     test = test_daemon()
 
-
     frm             = ttk.Frame(root, padding=10)
     mode_frm        = ttk.Frame(frm, padding=10)
     settings_frm    = ttk.Frame(frm, padding=10)
@@ -109,10 +112,11 @@ if __name__ == '__main__':
     ttk.Checkbutton(settings_frm, text="enable_dio_test", variable=settings["enable_dio_test"]).grid(sticky='nw')
     ttk.Checkbutton(settings_frm, text="enable_mouse", variable=settings["enable_mouse"]).grid(sticky='nw')
     ttk.Checkbutton(settings_frm, text="enable_bram_test", variable=settings["enable_bram_test"]).grid(sticky='nw')
+    ttk.Checkbutton(settings_frm, text="bram_both_banks", variable=settings["bram_both_banks"]).grid(stick='nw')
 
-    Label(dio_numeric_frm, text="DIO frequency divider (0-255)").grid(sticky='nw')
+    Label(dio_numeric_frm, text="DIO frequency divider (up to 255)").grid(sticky='nw')
     Entry(dio_numeric_frm, textvariable=settings["dio_divider"]).grid(sticky='nw')
-    
+
     dio_radio = [
         ttk.Radiobutton(mode_frm, text='DIO_MODE_OFF',                      value=0, variable=settings["dio_mode"]),
         ttk.Radiobutton(mode_frm, text='DIO_MODE_IMMUNITY_TOP_TO_BOTTOM',   value=1, variable=settings["dio_mode"]),

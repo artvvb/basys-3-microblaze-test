@@ -28,7 +28,7 @@ module bram_test #(
     output logic        seed_tready,
     input  logic [31:0] seed_tdata,
     input  logic        addr_max_tvalid,
-    input  logic [31:0] addr_max_tdata,
+    input  logic [31:0] addr_max_tdata, // {en_bank_1, }
     output logic        addr_max_tready,
     output logic [31:0] status_tdata, // "0" + {reset busy, done, test passed}
     output logic        status_tvalid,
@@ -49,8 +49,11 @@ module bram_test #(
     
     localparam logic [ADDR_WIDTH-1:0] ADDR_READ_VALID = 'd2; // switchover period
     logic [31:0] addr_max_reg;
+    logic [ADDR_WIDTH-1:0] addr_max;
+    logic [31-ADDR_WIDTH-1:0] loops;
+    logic [31-ADDR_WIDTH-1:0] loops_reg;
     logic en_bank_1;
-    logic [32-ADDR_WIDTH-1:0] loops;
+    always_comb {en_bank_1, loops, addr_max} = addr_max_reg;
     
     enum integer {
         RESET_BUSY,
@@ -73,9 +76,6 @@ module bram_test #(
         end
     end
     
-    logic [ADDR_WIDTH-1:0] addr_max;
-    always_comb addr_max = addr_max_reg[ADDR_WIDTH-1:0];
-    
     always_ff @(posedge clk) begin
         if (reset) begin
             state <= RESET_BUSY;
@@ -86,7 +86,7 @@ module bram_test #(
         SWITCHOVER:         if (addr + 1 == ADDR_READ_VALID)    state <= READ;
         READ:               if (addr == addr_max)               state <= FLUSH;
         FLUSH:              if (addr + 1 == ADDR_READ_VALID) begin
-                                if (loops == 0)
+                                if (loops_reg == 0)
                                     state <= WAIT_FOR_STATUS;
                                 else
                                     state <= WRITE;
@@ -97,11 +97,11 @@ module bram_test #(
     
     always_ff @(posedge clk) begin
         if (reset) begin
-            loops <= 0;
+            loops_reg <= 0;
         end else if (addr_max_tvalid && addr_max_tready) begin
-            loops <= addr_max_tdata[ADDR_WIDTH+:32-ADDR_WIDTH];
-        end else if (state == FLUSH && addr + 1 == ADDR_READ_VALID && loops > 0) begin
-            loops <= loops - 1;
+            loops_reg <= loops;
+        end else if (state == FLUSH && addr + 1 == ADDR_READ_VALID && loops_reg > 0) begin
+            loops_reg <= loops_reg - 1;
         end
     end
     
@@ -170,7 +170,6 @@ module bram_test #(
     
     always_comb wen = (state == WRITE);
     always_comb en = (state == WRITE || state == SWITCHOVER || state == READ);    
-    always_comb en_bank_1 = addr_max_reg[31];
     
     blk_mem_gen_0 bram_bank_0_inst (
         .clka       (clk),          // input wire clka

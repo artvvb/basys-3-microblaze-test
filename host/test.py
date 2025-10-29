@@ -51,21 +51,21 @@ def sendchr(port, c):
 
 def ReadXadc(port):
     port.write('x'.encode('utf-8'))
-
+    
     raw = port.read(4)
-    temp = ((int(raw, 16) // 16) * 503.975) / 4096 - 273.15
+    temp = round(((int(raw, 16) // 16) * 503.975) / 4096 - 273.15, 2)
     logging.info(f"XSM_CH_TEMP:    {temp} degrees C ({raw})")
 
     raw = port.read(4)
-    temp = (int(raw, 16) // 16) / 4096 * 3.0
+    temp = round((int(raw, 16) // 16) / 4096 * 3.0, 2)
     logging.info(f"XSM_CH_VCCINT:  {temp} V ({raw})")
     
     raw = port.read(4)
-    temp = (int(raw, 16) // 16) / 4096 * 3.0
+    temp = round((int(raw, 16) // 16) / 4096 * 3.0, 2)
     logging.info(f"XSM_CH_VCCAUX:  {temp} V ({raw})")
     
     raw = port.read(4)
-    temp = (int(raw, 16) // 16) / 4096 * 3.0
+    temp = round((int(raw, 16) // 16) / 4096 * 3.0, 2)
     logging.info(f"XSM_CH_VBRAM:   {temp} V ({raw})")
 
 def TestEcho(port, size=100):
@@ -146,7 +146,7 @@ def CheckDio(port):
         logging.error(f"Invalid DIO phase/divider configuration - check setup")
     
     if (status & 0xffff) != 0:
-        logging.error(f"Invalid DIO bits detected ({hex(status & 0xffff).zfill(4)}) since the last read")
+        logging.error(f"Invalid DIO bits detected ({hex(status & 0xffff)[2:].zfill(4)}) since the last read")
     else:
         logging.info(f"All DIO samples match")
 
@@ -178,21 +178,25 @@ def CheckMouse(port):
     logging.info(f"Mouse position: Y={(status>>12) & 0xfff}; X={(status & 0xfff)}")
     return True
 
-def CheckBram(port):
+def StartBram(port, bram_both_banks, bram_max_address, bram_repeats=9):
     seed = np.random.randint(0, 2**32, dtype=np.uint32)
     
     sendchr(port, 'w')
     sendint(port, BRAM_ADDR_MAX_ADDR, 2)
-    sendint(port, ((1 << BRAM_ADDR_BITS) - 1) | (0x0 << BRAM_ADDR_BITS), 8)
+    bram_repeats &= (1 << (31 - BRAM_ADDR_BITS)) - 1
+    bram_both_banks &= 1
+    bram_max_address &= (1 << BRAM_ADDR_BITS) - 1
+    sendint(port, (bram_both_banks << 31) | (bram_repeats << BRAM_ADDR_BITS) | bram_max_address, 8)
 
     sendchr(port, 'w')
     sendint(port, BRAM_SEED_ADDR, 2)
     sendint(port, seed, 8)
-    
+
+def CheckBram(port):
     sendchr(port, 'r')
     sendint(port, BRAM_STATUS_ADDR, 2)
     status = int(port.read(8), 16)
-    
+
     if testbit(status, 1):
         if testbit(status, 0):
             logging.info("BRAM test passed")
@@ -221,7 +225,9 @@ class test_obj:
         self.enable_dio_test = settings["enable_dio_test"].get()
         self.enable_mouse = settings["enable_mouse"].get()
         self.enable_bram_test = settings["enable_bram_test"].get()
-
+        self.bram_both_banks = settings["bram_both_banks"].get()
+        self.bram_max_address = settings["bram_max_address"].get()
+        
         logging.info("Starting Test")
         logging.info(f'Setting enable_xadc:         {settings["enable_xadc"].get()}')
         logging.info(f'Setting enable_flash_id:     {settings["enable_flash_id"].get()}')
@@ -230,9 +236,11 @@ class test_obj:
         logging.info(f'Setting enable_dio_test:     {settings["enable_dio_test"].get()}')
         logging.info(f'Setting enable_mouse:        {settings["enable_mouse"].get()}')
         logging.info(f'Setting enable_bram_test:    {settings["enable_bram_test"].get()}')
+        logging.info(f'Setting bram_both_banks:     {settings["bram_both_banks"].get()}')
+        logging.info(f'Setting bram_max_address:    {settings["bram_max_address"].get()}')
         logging.info(f'Setting dio_mode:            {settings["dio_mode"].get()}')
-        logging.info(f'Setting com_port:            {settings["com_port"]}')
         logging.info(f'Setting dio_divider:         {settings["dio_divider"].get()}')
+        logging.info(f'Setting com_port:            {settings["com_port"]}')
     
         if self.dio_mode == DIO_MODE_IMMUNITY_TOP_TO_BOTTOM or self.dio_mode == DIO_MODE_IMMUNITY_PORT_PAIRS:
             logging.info("Starting IMMUNITY test sequence")
@@ -284,13 +292,14 @@ class test_obj:
         if self.init_sequence >= 3:
             targettime = datetime.now() + timedelta(seconds=1)
             
-            if self.enable_xadc: ReadXadc(self.port)
-            if self.enable_flash_id: FlashReadId(self.port)
+            if self.enable_xadc:         ReadXadc(self.port)
+            if self.enable_bram_test:    StartBram(self.port, self.bram_both_banks, self.bram_both_banks, 0)
+            if self.enable_flash_id:     FlashReadId(self.port)
             if self.enable_flash_verify: FlashRead(self.port, self.qspi_seed)
-            if self.enable_uart_echo: TestEcho(self.port)
-            if self.enable_dio_test: CheckDio(self.port)
-            if self.enable_mouse: CheckMouse(self.port)
-            if self.enable_bram_test: CheckBram(self.port, )
+            if self.enable_uart_echo:    TestEcho(self.port)
+            if self.enable_dio_test:     CheckDio(self.port)
+            if self.enable_mouse:        CheckMouse(self.port)
+            if self.enable_bram_test:    CheckBram(self.port)
             
             timeleft = (targettime - datetime.now()).total_seconds()
             if timeleft > 0: time.sleep(timeleft)

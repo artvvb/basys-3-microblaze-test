@@ -18,7 +18,8 @@
 #define DIO_STATUS_ADDR		16	/* CLEAR-ON-READ */
 #define PS2_POS_ADDR		20	/* READ-ONLY */
 #define BRAM_SEED_ADDR		24	/* WRITE-ONLY */
-#define BRAM_STATUS_ADDR	28	/* READ-ONLY */
+#define BRAM_ADDR_MAX_ADDR  28  /* WRITE-ONLY */
+#define BRAM_STATUS_ADDR	32	/* READ-ONLY */
 
 /* Status register bit fields */
 #define STATUS_ADDR_BRAM_STATUS_TVALID_MASK 	0x80
@@ -163,6 +164,7 @@ int Ps2Read() {
 	return XST_SUCCESS;
 }
 
+/* Unused */
 int BramTest(uint32_t seed) {
 	volatile uint32_t *BramSeedPtr = (uint32_t*)(TOP_BASEADDR + BRAM_SEED_ADDR);
 	volatile uint32_t *BramStatusPtr = (uint32_t*)(TOP_BASEADDR + BRAM_STATUS_ADDR);
