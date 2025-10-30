@@ -165,7 +165,7 @@ module bram_test #(
         end
     end
     always_comb status_tdata[1] = (state == WAIT_FOR_STATUS);
-    always_comb status_tdata[31:2] = 'b0;
+    always_comb status_tdata[31:2] = rdata_compare[31:2];
     always_comb status_tvalid = 1;
     
     always_comb wen = (state == WRITE);

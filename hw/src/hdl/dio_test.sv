@@ -9,6 +9,14 @@ module dio_test (
     (* IOB = "TRUE" *) inout wire [7:0] jc,
     (* IOB = "TRUE" *) inout wire [7:0] jxadc,
 
+    input  logic [31:0] dio_counter_max_tdata,
+    input  logic        dio_counter_max_tvalid,
+    output logic        dio_counter_max_tready,
+    
+    input  logic [31:0] dio_output_phase_tdata,
+    input  logic        dio_output_phase_tvalid,
+    output logic        dio_output_phase_tready,
+    
     input  logic [31:0] dio_settings_tdata,
     input  logic        dio_settings_tvalid,
     output logic        dio_settings_tready,
@@ -25,13 +33,14 @@ module dio_test (
         DIO_MODE_EMISSIONS,
         MODE_OFF
     } DIO_MODE;
-    logic       running;
-    logic [1:0] valid_samples;
-    logic       clock_div_max_valid;
-    logic [7:0] clock_div_max;
-    logic [7:0] clock_div_count;
-    logic       update_output_phase_valid;
-    logic [7:0] update_output_phase;
+    logic        running;
+    logic [1:0]  valid_samples;
+    logic        clock_div_max_valid;
+    logic [31:0] clock_div_max;
+    logic [31:0] clock_div_count;
+    logic        update_output_phase_valid;
+    logic [31:0] update_output_phase;
+    
     DIO_MODE    mode;
     logic       mode_valid;
     
@@ -63,18 +72,18 @@ module dio_test (
     always_ff @(posedge clk) begin
         if (reset) begin
             clock_div_max_valid <= 0;
-        end else if (dio_settings_tvalid) begin
+        end else if (dio_counter_max_tvalid) begin
             clock_div_max_valid <= 1;
-            clock_div_max <= dio_settings_tdata[7:0];
+            clock_div_max <= dio_counter_max_tdata;
         end
     end
     
     always_ff @(posedge clk) begin
         if (reset) begin
             update_output_phase_valid <= 0;
-        end else if (dio_settings_tvalid) begin
+        end else if (dio_output_phase_tvalid) begin
             update_output_phase_valid <= 1;
-            update_output_phase <= dio_settings_tdata[15:8];
+            update_output_phase <= dio_output_phase_tdata;
         end
     end
 
@@ -84,7 +93,7 @@ module dio_test (
             mode <= MODE_OFF;
         end else if (dio_settings_tvalid) begin
             mode_valid <= 1;
-            case (dio_settings_tdata[17:16])
+            case (dio_settings_tdata[1:0])
             1: mode <= DIO_MODE_IMMUNITY_TOP_TO_BOTTOM;
             2: mode <= DIO_MODE_IMMUNITY_PORT_PAIRS;
             3: mode <= DIO_MODE_EMISSIONS;

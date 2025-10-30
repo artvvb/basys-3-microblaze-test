@@ -120,6 +120,8 @@ PS2_POS_ADDR = 20
 BRAM_SEED_ADDR = 24
 BRAM_ADDR_MAX_ADDR = 28
 BRAM_STATUS_ADDR = 32
+DIO_COUNTER_MAX_ADDR = 36
+DIO_OUTPUT_PHASE_ADDR = 40
 BRAM_ADDR_BITS = 13
 
 DIO_MODE_OFF = 0
@@ -151,11 +153,20 @@ def CheckDio(port):
         logging.info(f"All DIO samples match")
 
 def StartDio(port, mode, phase, divider):
-    settings = ((mode & 0x3) << 16) | ((phase & 0xff) << 8) | ((divider & 0xff))
     logging.info(f"Starting DIO with settings: mode:{mode}, phase:{phase}, divider:{divider}")
+
+    sendchr(port, 'w')
+    sendint(port, DIO_COUNTER_MAX_ADDR, 2)
+    sendint(port, divider, 8)
+
+    sendchr(port, 'w')
+    sendint(port, DIO_OUTPUT_PHASE_ADDR, 2)
+    sendint(port, phase, 8)
+
     sendchr(port, 'w')
     sendint(port, DIO_SETTINGS_ADDR, 2)
-    sendint(port, settings, 8)
+    sendint(port, mode & 0x3, 8)
+
     CheckDio(port)
 
 def CheckMouse(port):

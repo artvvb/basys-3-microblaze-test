@@ -165,15 +165,17 @@ module top (
     always_comb control_rresp = 2'b00; /* OKAY */
     
     /* Interface definitions */
-    localparam [7:0] STATUS_ADDR = 0;           // READ-ONLY
-    localparam [7:0] XADC_SET_CHAN_ADDR = 4;    // WRITE-ONLY
-    localparam [7:0] XADC_DATA_ADDR = 8;        // CLEAR-ON-READ
-    localparam [7:0] DIO_SETTINGS_ADDR = 12;    // WRITE-ONLY
-    localparam [7:0] DIO_STATUS_ADDR = 16;      // CLEAR-ON-READ
-    localparam [7:0] PS2_POS_ADDR = 20;         // READ-ONLY
-    localparam [7:0] BRAM_SEED_ADDR = 24;       // WRITE-ONLY
-    localparam [7:0] BRAM_ADDR_MAX_ADDR = 28;   // WRITE-ONLY
-    localparam [7:0] BRAM_STATUS_ADDR = 32;     // READ-ONLY
+    localparam [7:0] STATUS_ADDR = 0;             // READ-ONLY
+    localparam [7:0] XADC_SET_CHAN_ADDR = 4;      // WRITE-ONLY
+    localparam [7:0] XADC_DATA_ADDR = 8;          // CLEAR-ON-READ
+    localparam [7:0] DIO_SETTINGS_ADDR = 12;      // WRITE-ONLY
+    localparam [7:0] DIO_STATUS_ADDR = 16;        // CLEAR-ON-READ
+    localparam [7:0] PS2_POS_ADDR = 20;           // READ-ONLY
+    localparam [7:0] BRAM_SEED_ADDR = 24;         // WRITE-ONLY
+    localparam [7:0] BRAM_ADDR_MAX_ADDR = 28;     // WRITE-ONLY
+    localparam [7:0] BRAM_STATUS_ADDR = 32;       // READ-ONLY
+    localparam [7:0] DIO_COUNTER_MAX_ADDR = 36;   // WRITE-ONLY
+    localparam [7:0] DIO_OUTPUT_PHASE_ADDR = 40;  // WRITE-ONLY
     
     logic [7:0] xadc_set_addr_tdata;
     logic       xadc_set_addr_tvalid;
@@ -199,11 +201,19 @@ module top (
     logic [31:0] bram_status_tdata;
     logic        bram_status_tvalid;
     logic        bram_status_tready;
+    logic [31:0] dio_counter_max_tdata;
+    logic        dio_counter_max_tvalid;
+    logic        dio_counter_max_tready;
+    logic [31:0] dio_output_phase_tdata;
+    logic        dio_output_phase_tvalid;
+    logic        dio_output_phase_tready;
 
     always_comb begin
         case (araddr_reg)
         STATUS_ADDR: control_rdata = {
-            25'b0,
+            23'b0,
+            dio_counter_max_tready,
+            dio_output_phase_tready,
             bram_status_tvalid,
             bram_seed_tready, // also gives the status of bram_addr_max_tready
             ps2_pos_tvalid,
@@ -221,14 +231,18 @@ module top (
     end
     
 //    always_comb xadc_set_addr_tdata = wdata_reg;
-    always_comb dio_settings_tdata  = wdata_reg;
-    always_comb bram_seed_tdata     = wdata_reg;
-    always_comb bram_addr_max_tdata = wdata_reg;
+    always_comb dio_settings_tdata     = wdata_reg;
+    always_comb bram_seed_tdata        = wdata_reg;
+    always_comb bram_addr_max_tdata    = wdata_reg;
+    always_comb dio_output_phase_tdata = wdata_reg;
+    always_comb dio_counter_max_tdata  = wdata_reg;
     
 //    always_comb xadc_set_addr_tvalid    = write_strobe && (awaddr_reg == XADC_SET_CHAN_ADDR);
     always_comb dio_settings_tvalid     = write_strobe && (awaddr_reg == DIO_SETTINGS_ADDR);
     always_comb bram_seed_tvalid        = write_strobe && (awaddr_reg == BRAM_SEED_ADDR);
     always_comb bram_addr_max_tvalid    = write_strobe && (awaddr_reg == BRAM_ADDR_MAX_ADDR);
+    always_comb dio_output_phase_tvalid = write_strobe && (awaddr_reg == DIO_OUTPUT_PHASE_ADDR);
+    always_comb dio_counter_max_tvalid  = write_strobe && (awaddr_reg == DIO_COUNTER_MAX_ADDR);
     
 //    always_comb xadc_tready         = read_strobe && (araddr_reg == XADC_DATA_ADDR);
     always_comb dio_status_tready   = read_strobe && (araddr_reg == DIO_STATUS_ADDR);
@@ -260,6 +274,12 @@ module top (
         .jb                              (jb),
         .jc                              (jc),
         .jxadc                           (jxadc),
+        .dio_counter_max_tdata           (dio_counter_max_tdata),
+        .dio_counter_max_tvalid          (dio_counter_max_tvalid),
+        .dio_counter_max_tready          (dio_counter_max_tready),
+        .dio_output_phase_tdata          (dio_output_phase_tdata),
+        .dio_output_phase_tvalid         (dio_output_phase_tvalid),
+        .dio_output_phase_tready         (dio_output_phase_tready),
         .dio_settings_tdata              (dio_settings_tdata),
         .dio_settings_tvalid             (dio_settings_tvalid),
         .dio_settings_tready             (dio_settings_tready),
