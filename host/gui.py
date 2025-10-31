@@ -5,7 +5,6 @@ if __name__ == '__main__':
     from datetime import datetime, timedelta
     from time import sleep
     import sys
-    from test import run_test
     import os
     from daemon import daemon_handler
     from test import test_obj
@@ -70,6 +69,7 @@ if __name__ == '__main__':
         "dio_mode":             IntVar(root, 1),
         "bram_both_banks":      BooleanVar(root, True),
         "bram_max_address":     IntVar(root, 0x1fff),
+        "bram_passes":          IntVar(root, 8000),
         "com_port":             sys.argv[1]
     }
 
@@ -114,8 +114,11 @@ if __name__ == '__main__':
     ttk.Checkbutton(settings_frm, text="enable_bram_test", variable=settings["enable_bram_test"]).grid(sticky='nw')
     ttk.Checkbutton(settings_frm, text="bram_both_banks", variable=settings["bram_both_banks"]).grid(stick='nw')
 
-    Label(dio_numeric_frm, text="DIO frequency divider (up to 255)").grid(sticky='nw')
+    Label(dio_numeric_frm, text="DIO frequency divider").grid(sticky='nw')
     Entry(dio_numeric_frm, textvariable=settings["dio_divider"]).grid(sticky='nw')
+    
+    Label(dio_numeric_frm, text="BRAM write/read passes per loop").grid(sticky='nw')
+    Entry(dio_numeric_frm, text="bram_passes", textvariable=settings["bram_passes"]).grid(sticky='nw')
 
     dio_radio = [
         ttk.Radiobutton(mode_frm, text='DIO_MODE_OFF',                      value=0, variable=settings["dio_mode"]),

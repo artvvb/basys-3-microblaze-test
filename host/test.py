@@ -236,6 +236,7 @@ class test_obj:
         self.enable_dio_test = settings["enable_dio_test"].get()
         self.enable_mouse = settings["enable_mouse"].get()
         self.enable_bram_test = settings["enable_bram_test"].get()
+        self.bram_repeats = settings["bram_passes"].get() - 1
         self.bram_both_banks = settings["bram_both_banks"].get()
         self.bram_max_address = settings["bram_max_address"].get()
         
@@ -249,6 +250,7 @@ class test_obj:
         logging.info(f'Setting enable_bram_test:    {settings["enable_bram_test"].get()}')
         logging.info(f'Setting bram_both_banks:     {settings["bram_both_banks"].get()}')
         logging.info(f'Setting bram_max_address:    {settings["bram_max_address"].get()}')
+        logging.info(f'Setting bram_passes:        {settings["bram_passes"].get()}')
         logging.info(f'Setting dio_mode:            {settings["dio_mode"].get()}')
         logging.info(f'Setting dio_divider:         {settings["dio_divider"].get()}')
         logging.info(f'Setting com_port:            {settings["com_port"]}')
@@ -289,7 +291,11 @@ class test_obj:
         if self.init_sequence == 2:
             logging.info(f"Connecting to board on port {self.com_port}")
             # note: a much shorter timeout can't be used as long as the flash read cycle stays fully blocking
-            self.port = ser.Serial(port=self.com_port, baudrate=115200, timeout=0.4)
+            try: 
+                self.port = ser.Serial(port=self.com_port, baudrate=115200, timeout=0.4)
+            except ser.SerialException():
+                logging.error(f"Failed to connect to {self.com_port}")
+                return
             self.phase = ((self.dio_divider + 1) // 2) - 1
             StartDio(self.port, self.dio_mode, self.phase, self.dio_divider)
             logging.info(f"DIO counter output frequency is set to {100_000_000 / (2 * (self.dio_divider + 1))} MHz")
@@ -304,7 +310,7 @@ class test_obj:
             targettime = datetime.now() + timedelta(seconds=1)
             
             if self.enable_xadc:         ReadXadc(self.port)
-            if self.enable_bram_test:    StartBram(self.port, self.bram_both_banks, self.bram_both_banks, 0)
+            if self.enable_bram_test:    StartBram(self.port, self.bram_both_banks, self.bram_both_banks, self.bram_repeats)
             if self.enable_flash_id:     FlashReadId(self.port)
             if self.enable_flash_verify: FlashRead(self.port, self.qspi_seed)
             if self.enable_uart_echo:    TestEcho(self.port)
@@ -318,81 +324,6 @@ class test_obj:
     def stop_test(self):
         if not self.port is None:
             self.port.close()
-
-def run_test(done_callback, settings):
-    dio_mode = settings["dio_mode"].get()
-    com_port = settings["com_port"]
-    dio_divider = settings["dio_divider"].get()
-    dio_mode = settings["dio_mode"].get()
-    enable_xadc = settings["enable_xadc"].get()
-    enable_flash_id = settings["enable_flash_id"].get()
-    enable_flash_verify = settings["enable_flash_verify"].get()
-    enable_uart_echo = settings["enable_uart_echo"].get()
-    enable_dio_test = settings["enable_dio_test"].get()
-    enable_mouse = settings["enable_mouse"].get()
-    enable_bram_test = settings["enable_bram_test"].get()
-
-    if dio_mode == DIO_MODE_IMMUNITY_TOP_TO_BOTTOM or dio_mode == DIO_MODE_IMMUNITY_PORT_PAIRS:
-        logging.info("Starting IMMUNITY test sequence")
-    elif dio_mode == DIO_MODE_EMISSIONS:
-        logging.info("Starting EMISSIONS test sequence")
-    else:
-        logging.info("Starting test sequence with DIO off")
-
-    qspi_seed = np.random.randint(0, 2**32, dtype=np.uint32)
-
-    if done_callback(): return
-
-    if enable_flash_verify:
-        logging.info(f"Writing QSPI...")
-        if not write_qspi_binfile(qspi_seed):
-            return
-    else:
-        logging.info(f"Skipping QSPI write, Flash read test is not enabled")
-    
-    if done_callback(): return
-    
-    logging.info(f"Writing FPGA image...")
-    if not program_device():
-        return
-
-    program_only = False
-    if program_only: exit()
-
-    logging.info(f"Connecting to board on port {com_port}")
-
-    iteration = 0
-
-    with ser.Serial(port=com_port, baudrate=115200, timeout=0.4) as port:
-    # with ser.Serial(port=sys.argv[1], baudrate=115200, timeout=0.1) as port:
-        # Start DIO test
-        phase = ((dio_divider + 1) // 2) - 1
-        
-        StartDio(port, dio_mode, phase, dio_divider)
-        logging.info(f"DIO counter output frequency is set to {100_000_000 / (2 * (dio_divider + 1))} MHz")
-        logging.info(f"DIO readback phase count is set to {phase} / {dio_divider}")
-
-        while not done_callback():
-            targettime = datetime.now() + timedelta(seconds=1)
-            iteration += 1
-            logging.info(f"Cycle #{iteration}")
-            # Read XADC
-            if enable_xadc: ReadXadc(port)
-            # Do a Read ID
-            if enable_flash_id: FlashReadId(port)
-            # Do a SPI read
-            if enable_flash_verify: FlashRead(port, qspi_seed)
-            # Echo random data
-            if enable_uart_echo: TestEcho(port)
-            # Check DIO test
-            if enable_dio_test: CheckDio(port)
-            # Check mouse connectivity
-            if enable_mouse: CheckMouse(port)
-            # Run BRAM memory test
-            if enable_bram_test: CheckBram(port)
-            
-            timeleft = (targettime - datetime.now()).total_seconds()
-            if timeleft > 0: time.sleep(timeleft)
 
 if __name__ == "__main__":
     def init_logging():
@@ -420,7 +351,7 @@ if __name__ == "__main__":
         "dio_mode":            2,
         "com_port":            sys.argv[1]
     }
-    run_test(lambda a, b: True, lambda a: True, settings)
+    raise NotImplementedError("Run test via gui.py script instead.")
 
 # BRAM: Add continuous immunity mode?
 #       Implement controls for bank 1 and addressing in GUI.
