@@ -15,8 +15,8 @@ if __name__ == '__main__':
         logger = logging.getLogger()
 
         i = 0
-        while os.path.exists("run_{i}.log"): i += 1
-        file_handler = logging.FileHandler("temp.log")
+        while os.path.exists(f"run_{i}.log"): i += 1
+        file_handler = logging.FileHandler(f"run_{i}.log")
         file_handler.setFormatter(log_formatter)
         logger.addHandler(file_handler)
 
